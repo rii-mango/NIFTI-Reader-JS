@@ -1,5 +1,5 @@
 # NIFTI-Reader-JS
-A JavaScript [NIfTI](http://nifti.nimh.nih.gov/) file format reader.  This reader supports both .nii and .nii.gz file types.
+A JavaScript [NIfTI](http://nifti.nimh.nih.gov/) file format reader.  This reader supports both .nii and .nii.gz file types.  Current [TODO](https://github.com/rii-mango/NIFTI-Reader-JS/wiki/TODO) list.
 
 ###Usage
 See the [tests](https://github.com/rii-mango/NIFTI-Reader-JS/tree/master/tests) folder for more examples.
