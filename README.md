@@ -5,12 +5,18 @@ A JavaScript [NIfTI](http://nifti.nimh.nih.gov/) file format reader.
 See the [tests](https://github.com/rii-mango/NIFTI-Reader-JS/tree/master/tests) folder for more examples.
 
 ```javascript
+var data = // an ArrayBuffer
+var niftiHeader = null,
+    niftiImage = null;
+
 if (nifti.isCompressed(data)) {
     data = nifti.decompress(data);
 }
 
-var nifti1 = nifti.readHeader(data);
-var imageData = nifti.readerImage(nifti1, data);
+if (nifti.isNIFTI1(data)) {
+    niftiHeader = nifti.readHeader(data);
+    niftiImage = nifti.readerImage(niftiHeader, data);
+}
 ```
 
 ###Install
