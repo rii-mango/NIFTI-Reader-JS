@@ -48,3 +48,10 @@ See the [release folder](https://github.com/rii-mango/NIFTI-Reader-JS/tree/maste
 npm run build
 ```
 This will output nifti-reader.js and nifti-reader-min.js to build/.
+
+
+Acknowledgments
+-----
+NIFTI-Reader-JS makes use of the following third-party libraries:
+- [pako](https://github.com/nodeca/pako) &mdash; for GZIP inflating
+
