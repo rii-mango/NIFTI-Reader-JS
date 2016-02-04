@@ -1,5 +1,17 @@
 # NIFTI-Reader-JS
-A JavaScript NIfTI File Format Reader
+A JavaScript NIfTI file format reader.
+
+###Usage
+See the [tests](https://github.com/rii-mango/NIFTI-Reader-JS/tree/master/tests) folder for more examples.
+
+```javascript
+if (nifti.isCompressed(data)) {
+    data = nifti.decompress(data);
+}
+
+var nifti1 = nifti.readHeader(data);
+var imageData = nifti.readerImage(nifti1, data);
+```
 
 ###Install
 Get a packaged source file:
