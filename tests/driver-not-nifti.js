@@ -1,0 +1,33 @@
+
+/*jslint browser: true, node: true */
+/*global require, module, describe, it */
+
+"use strict";
+
+var assert = require("assert");
+var fs = require('fs');
+
+var nifti = require('../src/nifti.js');
+
+var buf = fs.readFileSync('./tests/data/not-nifti.nii');
+var data = nifti.Utils.toArrayBuffer(buf);
+
+describe('NIFTI-Reader-JS', function () {
+    describe('not-nifti test', function () {
+        it('isCompressed() should return false', function () {
+            assert.equal(false, nifti.isCompressed(null, data));
+        });
+
+        it('isNIFTI1() should return false', function () {
+            assert.equal(false, nifti.isNIFTI1(null, data));
+        });
+
+        it('does throw error when reading', function () {
+            function test() {
+                nifti.readHeader(data);
+            }
+
+            assert.throws(test, Error, "Error thrown");
+        });
+    });
+});

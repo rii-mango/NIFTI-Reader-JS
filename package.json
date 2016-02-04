@@ -1,0 +1,36 @@
+{
+  "name": "nifti-reader-js",
+  "version": "0.1.0",
+  "description": "A JavaScript NIfTI file format reader.",
+  "main": "src/nifti.js",
+  "directories": {
+    "test": "tests"
+  },
+  "dependencies": {
+    "pako": "*"
+  },
+  "devDependencies": {
+    "mocha": "*",
+    "browserify": "*",
+    "uglifyjs": "*"
+  },
+  "scripts": {
+    "test": "mocha --timeout 0 tests",
+    "build": "rm -rf build; mkdir build; browserify --standalone nifti src/main.js -o build/nifti-reader.js; uglifyjs build/nifti-reader.js -o build/nifti-reader-min.js",
+    "release": "rm release/current/*.js; cp build/*.js release/current/."
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rii-mango/NIFTI-Reader-JS.git"
+  },
+  "keywords": [
+    "JavaScript",
+    "NIFTI"
+  ],
+  "author": "Michael Martinez",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/rii-mango/NIFTI-Reader-JS/issues"
+  },
+  "homepage": "https://github.com/rii-mango/NIFTI-Reader-JS"
+}
