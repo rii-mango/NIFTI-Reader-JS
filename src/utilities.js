@@ -10,6 +10,7 @@ var nifti = nifti || {};
 nifti.Utils = nifti.Utils || {};
 
 
+
 /*** Static Pseudo-constants ***/
 
 nifti.Utils.crcTable = null;
@@ -17,7 +18,48 @@ nifti.Utils.GUNZIP_MAGIC_COOKIE1 = 31;
 nifti.Utils.GUNZIP_MAGIC_COOKIE2 = 139;
 
 
+
 /*** Static methods ***/
+
+nifti.Utils.getStringAt = function (data, start, end) {
+    var str = "", ctr, ch;
+
+    for (ctr = start; ctr < end; ctr += 1) {
+        ch = data.getUint8(ctr);
+
+        if (ch !== 0) {
+            str += String.fromCharCode(ch);
+        }
+    }
+
+    return str;
+};
+
+
+
+nifti.Utils.getByteAt = function (data, start) {
+    return data.getInt8(start);
+};
+
+
+
+nifti.Utils.getShortAt = function (data, start, littleEndian) {
+    return data.getInt16(start, littleEndian);
+};
+
+
+
+nifti.Utils.getIntAt = function (data, start, littleEndian) {
+    return data.getInt32(start, littleEndian);
+};
+
+
+
+nifti.Utils.getFloatAt = function (data, start, littleEndian) {
+    return data.getFloat32(start, littleEndian);
+};
+
+
 
 nifti.Utils.toArrayBuffer = function (buffer) {
     var ab, view, i;
@@ -29,6 +71,7 @@ nifti.Utils.toArrayBuffer = function (buffer) {
     }
     return ab;
 };
+
 
 
 // http://stackoverflow.com/questions/18638900/javascript-crc32
@@ -45,6 +88,8 @@ nifti.Utils.makeCRCTable = function(){
     return crcTable;
 };
 
+
+
 nifti.Utils.crc32 = function(dataView) {
     var crcTable = nifti.Utils.crcTable || (nifti.Utils.crcTable = nifti.Utils.makeCRCTable());
     var crc = 0 ^ (-1);
@@ -55,6 +100,7 @@ nifti.Utils.crc32 = function(dataView) {
 
     return (crc ^ (-1)) >>> 0;
 };
+
 
 
 /*** Exports ***/
