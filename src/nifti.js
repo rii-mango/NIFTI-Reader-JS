@@ -67,6 +67,12 @@ nifti.isNIFTI2 = function (data) {
 
 
 
+nifti.isNIFTI = function (data) {
+    return (nifti.isNIFTI1(data) || nifti.isNIFTI2(data));
+};
+
+
+
 nifti.isCompressed = function (data) {
     var buf, magicCookie1, magicCookie2;
 

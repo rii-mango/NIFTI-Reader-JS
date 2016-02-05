@@ -18,12 +18,8 @@ describe('NIFTI-Reader-JS', function () {
             assert.equal(false, nifti.isCompressed(data));
         });
 
-        it('isNIFTI1() should return false', function () {
-            assert.equal(false, nifti.isNIFTI1(data));
-        });
-
-        it('isNIFTI2() should return false', function () {
-            assert.equal(false, nifti.isNIFTI2(data));
+        it('isNIFTI() should return false', function () {
+            assert.equal(false, nifti.isNIFTI(data));
         });
 
         it('readHeader() should return null', function () {

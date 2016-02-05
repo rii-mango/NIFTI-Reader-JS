@@ -23,6 +23,10 @@ describe('NIFTI-Reader-JS', function () {
             assert.equal(true, nifti.isNIFTI1(data));
         });
 
+        it('isNIFTI() should return true', function () {
+            assert.equal(true, nifti.isNIFTI(data));
+        });
+
         it('should not throw error when reading header', function (done) {
             assert.doesNotThrow(function() {
                 nifti1 = nifti.readHeader(data);
