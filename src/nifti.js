@@ -8,6 +8,7 @@
 
 var nifti = nifti || {};
 nifti.NIFTI1 = nifti.NIFTI1 || ((typeof require !== 'undefined') ? require('./nifti1.js') : null);
+nifti.NIFTI2 = nifti.NIFTI2 || ((typeof require !== 'undefined') ? require('./nifti2.js') : null);
 nifti.Utils = nifti.Utils || ((typeof require !== 'undefined') ? require('./utilities.js') : null);
 
 var pako = pako || ((typeof require !== 'undefined') ? require('pako') : null);
@@ -38,12 +39,8 @@ nifti.TYPE_COMPLEX256   = 2048;
 
 /*** Static Methods ***/
 
-nifti.isNIFTI1 = function (filename, data) {
+nifti.isNIFTI1 = function (data) {
     var buf, mag1, mag2, mag3;
-
-    if (filename && (filename.indexOf(".nii") !== -1)) {
-        return true;
-    }
 
     buf = new DataView(data);
     mag1 = buf.getUint8(nifti.NIFTI1.MAGIC_NUMBER_LOCATION);
@@ -56,12 +53,22 @@ nifti.isNIFTI1 = function (filename, data) {
 
 
 
-nifti.isCompressed = function (filename, data) {
-    var buf, magicCookie1, magicCookie2;
+nifti.isNIFTI2 = function (data) {
+    var buf, mag1, mag2, mag3;
 
-    if (filename && (filename.indexOf(".gz") !== -1)) {
-        return true;
-    }
+    buf = new DataView(data);
+    mag1 = buf.getUint8(nifti.NIFTI2.MAGIC_NUMBER_LOCATION);
+    mag2 = buf.getUint8(nifti.NIFTI2.MAGIC_NUMBER_LOCATION + 1);
+    mag3 = buf.getUint8(nifti.NIFTI2.MAGIC_NUMBER_LOCATION + 2);
+
+    return !!((mag1 === nifti.NIFTI2.MAGIC_NUMBER[0]) && (mag2 === nifti.NIFTI2.MAGIC_NUMBER[1]) &&
+    (mag3 === nifti.NIFTI2.MAGIC_NUMBER[2]));
+};
+
+
+
+nifti.isCompressed = function (data) {
+    var buf, magicCookie1, magicCookie2;
 
     if (data) {
         buf = new DataView(data);
@@ -90,9 +97,19 @@ nifti.decompress = function (data) {
 
 
 nifti.readHeader = function (data) {
-    var nifti1 = new nifti.NIFTI1();
-    nifti1.readHeader(data);
-    return nifti1;
+    var header = null;
+
+    if (nifti.isNIFTI1(data)) {
+        header = new nifti.NIFTI1();
+    } else if (nifti.isNIFTI2(data)) {
+        header = new nifti.NIFTI2();
+    }
+
+    if (header) {
+        header.readHeader(data);
+    }
+
+    return header;
 };
 
 

@@ -16,7 +16,7 @@ var nifti1 = null;
 describe('NIFTI-Reader-JS', function () {
     describe('nifti-1 little endian test', function () {
         it('isCompressed() should return true', function () {
-            assert.equal(true, nifti.isCompressed(null, data));
+            assert.equal(true, nifti.isCompressed(data));
         });
 
         it('should not throw error when decompressing', function (done) {
@@ -27,7 +27,7 @@ describe('NIFTI-Reader-JS', function () {
         });
 
         it('isNIFTI1() should return true', function () {
-            assert.equal(true, nifti.isNIFTI1(null, data));
+            assert.equal(true, nifti.isNIFTI1(data));
         });
 
         it('should not throw error when reading header', function (done) {

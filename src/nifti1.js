@@ -53,7 +53,6 @@ nifti.NIFTI1 = nifti.NIFTI1 || function () {
 /*** Static Pseudo-constants ***/
 
 nifti.NIFTI1.MAGIC_COOKIE = 348;
-nifti.NIFTI1.NII_HDR_SIZE = 352;
 nifti.NIFTI1.MAGIC_NUMBER_LOCATION = 344;
 nifti.NIFTI1.MAGIC_NUMBER = [110, 43, 49];  // n+1
 

@@ -16,11 +16,11 @@ var nifti1 = null;
 describe('NIFTI-Reader-JS', function () {
     describe('uncompressed nifti-1 test', function () {
         it('isCompressed() should return false', function () {
-            assert.equal(false, nifti.isCompressed(null, data));
+            assert.equal(false, nifti.isCompressed(data));
         });
 
         it('isNIFTI1() should return true', function () {
-            assert.equal(true, nifti.isNIFTI1(null, data));
+            assert.equal(true, nifti.isNIFTI1(data));
         });
 
         it('should not throw error when reading header', function (done) {

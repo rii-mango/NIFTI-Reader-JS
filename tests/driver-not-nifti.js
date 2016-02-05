@@ -15,19 +15,19 @@ var data = nifti.Utils.toArrayBuffer(buf);
 describe('NIFTI-Reader-JS', function () {
     describe('not-nifti test', function () {
         it('isCompressed() should return false', function () {
-            assert.equal(false, nifti.isCompressed(null, data));
+            assert.equal(false, nifti.isCompressed(data));
         });
 
         it('isNIFTI1() should return false', function () {
-            assert.equal(false, nifti.isNIFTI1(null, data));
+            assert.equal(false, nifti.isNIFTI1(data));
         });
 
-        it('does throw error when reading', function () {
-            function test() {
-                nifti.readHeader(data);
-            }
+        it('isNIFTI2() should return false', function () {
+            assert.equal(false, nifti.isNIFTI2(data));
+        });
 
-            assert.throws(test, Error, "Error thrown");
+        it('readHeader() should return null', function () {
+            assert.equal(null, nifti.readHeader(data));
         });
     });
 });
