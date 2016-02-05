@@ -160,7 +160,7 @@ nifti.NIFTI1.prototype.readHeader = function (data) {
 };
 
 
-
+// http://nifti.nimh.nih.gov/pub/dist/src/niftilib/nifti1_io.c
 nifti.NIFTI1.prototype.convertNiftiQFormToNiftiSForm = function (qb, qc, qd, qx, qy, qz, dx, dy, dz,
                                                                               qfac) {
     var R = [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]],
@@ -219,6 +219,7 @@ nifti.NIFTI1.prototype.convertNiftiQFormToNiftiSForm = function (qb, qc, qd, qx,
 
 
 
+// http://nifti.nimh.nih.gov/pub/dist/src/niftilib/nifti1_io.c
 nifti.NIFTI1.prototype.convertNiftiSFormToNEMA = function (R) {
     var xi, xj, xk, yi, yj, yk, zi, zj, zk, val, detQ, detP, i, j, k, p, q, r, ibest, jbest, kbest, pbest, qbest, rbest,
         M, vbest, Q, P, iChar, jChar, kChar, iSense, jSense, kSense;
@@ -496,6 +497,7 @@ nifti.NIFTI1.prototype.convertNiftiSFormToNEMA = function (R) {
 
 
 
+// http://nifti.nimh.nih.gov/pub/dist/src/niftilib/nifti1_io.c
 nifti.NIFTI1.prototype.nifti_mat33_mul = function (A, B) {
     var C = [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
         i,
@@ -512,6 +514,7 @@ nifti.NIFTI1.prototype.nifti_mat33_mul = function (A, B) {
 
 
 
+// http://nifti.nimh.nih.gov/pub/dist/src/niftilib/nifti1_io.c
 nifti.NIFTI1.prototype.nifti_mat33_determ = function (R) {
     var r11, r12, r13, r21, r22, r23, r31, r32, r33;
     /*  INPUT MATRIX:  */
