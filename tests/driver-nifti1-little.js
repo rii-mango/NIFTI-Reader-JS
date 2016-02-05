@@ -37,6 +37,10 @@ describe('NIFTI-Reader-JS', function () {
             });
         });
 
+        it('numBitsPerVoxel should be 32', function () {
+            assert.equal(32, nifti1.numBitsPerVoxel);
+        });
+
         it('littleEndian should be true', function () {
             assert.equal(true, nifti1.littleEndian);
         });
