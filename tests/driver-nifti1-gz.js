@@ -49,6 +49,10 @@ describe('NIFTI-Reader-JS', function () {
             assert.equal(91, nifti1.dims[3]);
         });
 
+        it('hasExtension() should return false', function () {
+            assert.equal(false, nifti.hasExtension(nifti1));
+        });
+
         it('image data checksum should equal 1033497386', function () {
             var imageData = nifti.readImage(nifti1, data);
             var checksum = nifti.Utils.crc32(new DataView(imageData));

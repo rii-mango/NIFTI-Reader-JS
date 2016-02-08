@@ -98,12 +98,35 @@ nifti.readHeader = function (data) {
 
 
 
-nifti.readImage = function (nifti, data) {
-    var imageOffset = nifti.vox_offset;
-    var imageSize = nifti.dims[1] * nifti.dims[2] * nifti.dims[3] * nifti.dims[4] * (nifti.numBitsPerVoxel / 8);
+nifti.hasExtension = function (header) {
+    return (header.extensionFlag[0] != 0);
+};
+
+
+
+nifti.readImage = function (header, data) {
+    var imageOffset = header.vox_offset;
+    var imageSize = header.dims[1] * header.dims[2] * header.dims[3] * header.dims[4] * (header.numBitsPerVoxel / 8);
     return data.slice(imageOffset, imageOffset + imageSize);
 };
 
+
+
+nifti.readExtension = function (header, data) {
+    var loc = header.getExtensionLocation(),
+        size = nifti.Utils.getIntAt(new DataView(data), loc, header.littleEndian);
+
+    return data.slice(loc, loc + size);
+};
+
+
+
+nifti.readExtensionData = function (header, data) {
+    var loc = header.getExtensionLocation(),
+        size = nifti.Utils.getIntAt(new DataView(data), loc, header.littleEndian);
+
+    return data.slice(loc + 8, loc + size - 8);
+};
 
 
 /*** Exports ***/

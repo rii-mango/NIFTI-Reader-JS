@@ -47,6 +47,7 @@ nifti.NIFTI2 = nifti.NIFTI2 || function () {
         this.qoffset_z = 0;
         this.affine = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
         this.magic = 0;
+        this.extensionFlag = [0, 0, 0, 0];
     };
 
 
@@ -142,6 +143,13 @@ nifti.NIFTI2.prototype.readHeader = function (data) {
     this.intent_name = nifti.Utils.getStringAt(rawData, 508, 508 + 16);
 
     this.dim_info = nifti.Utils.getByteAt(rawData, 524);
+
+    if (rawData.byteLength > nifti.NIFTI2.MAGIC_COOKIE) {
+        this.extensionFlag[0] = nifti.Utils.getByteAt(rawData, 540);
+        this.extensionFlag[1] = nifti.Utils.getByteAt(rawData, 540 + 1);
+        this.extensionFlag[2] = nifti.Utils.getByteAt(rawData, 540 + 2);
+        this.extensionFlag[3] = nifti.Utils.getByteAt(rawData, 540 + 3);
+    }
 };
 
 
@@ -231,6 +239,12 @@ nifti.NIFTI2.prototype.toFormattedString = function () {
     string += ("Dim Info = " + this.dim_info + "\n");
 
     return string;
+};
+
+
+
+nifti.NIFTI2.prototype.getExtensionLocation = function() {
+    return nifti.NIFTI2.MAGIC_COOKIE + 4;
 };
 
 
