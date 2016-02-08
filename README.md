@@ -7,16 +7,21 @@ See the [tests](https://github.com/rii-mango/NIFTI-Reader-JS/tree/master/tests) 
 ```javascript
 var data = // an ArrayBuffer
 var niftiHeader = null,
-    niftiImage = null;
+    niftiImage = null,
+    niftiExt = null;
 
 if (nifti.isCompressed(data)) {
     data = nifti.decompress(data);
 }
 
-if (nifti.isNIFTI1(data)) {
+if (nifti.isNIFTI(data)) {
     niftiHeader = nifti.readHeader(data);
     console.log(niftiHeader.toFormattedString());
     niftiImage = nifti.readerImage(niftiHeader, data);
+    
+    if (nifti.hasExtension(niftiHeader)) {
+        niftiExt = nifti.readExtensionData(niftiHeader, data);
+    }
 }
 ```
 
