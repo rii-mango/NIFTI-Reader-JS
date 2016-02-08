@@ -153,6 +153,88 @@ nifti.NIFTI1.prototype.getQformMat = function () {
 
 
 
+nifti.NIFTI1.prototype.toFormattedString = function () {
+    var fmt = nifti.Utils.formatNumber,
+        string = "";
+
+    string += ("Dim Info = " + this.dim_info + "\n");
+
+    string += ("Image Dimensions (1-8): " +
+        this.dims[0] + ", " +
+        this.dims[1] + ", " +
+        this.dims[2] + ", " +
+        this.dims[3] + ", " +
+        this.dims[4] + ", " +
+        this.dims[5] + ", " +
+        this.dims[6] + ", " +
+        this.dims[7] + "\n");
+
+    string += ("Intent Parameters (1-3): " +
+        this.intent_p1 + ", " +
+        this.intent_p2 + ", " +
+        this.intent_p3) + "\n";
+
+    string += ("Intent Code = " + this.intent_code + "\n");
+    string += ("Datatype = " + this.datatypeCode + "\n");
+    string += ("Bits Per Voxel = " + this.numBitsPerVoxel + "\n");
+    string += ("Slice Start = " + this.slice_start + "\n");
+    string += ("Voxel Dimensions (1-8): " +
+        fmt(this.pixDims[0]) + ", " +
+        fmt(this.pixDims[1]) + ", " +
+        fmt(this.pixDims[2]) + ", " +
+        fmt(this.pixDims[3]) + ", " +
+        fmt(this.pixDims[4]) + ", " +
+        fmt(this.pixDims[5]) + ", " +
+        fmt(this.pixDims[6]) + ", " +
+        fmt(this.pixDims[7]) + "\n");
+
+    string += ("Image Offset = " + this.vox_offset + "\n");
+    string += ("Data Scale:  Slope = " + this.scl_slope + "  Intercept = " + this.scl_inter+ "\n");
+    string += ("Slice End = " + this.slice_end + "\n");
+    string += ("Slice Code = " + this.slice_code + "\n");
+    string += ("Units Code = " + this.xyzt_units + "\n");
+    string += ("Display Range:  Max = " + this.cal_max + "  Min = " + this.cal_min + "\n");
+    string += ("Slice Duration = " + this.slice_duration + "\n");
+    string += ("Time Axis Shift = " + this.toffset + "\n");
+    string += ("Description: \"" + this.description + "\"\n");
+    string += ("Auxiliary File: \"" + this.aux_file + "\"\n");
+    string += ("Q-Form Code = " + this.qform_code + "\n");
+    string += ("S-Form Code = " + this.sform_code + "\n");
+    string += ("Quaternion Parameters:  " +
+        "b = " + fmt(this.quatern_b) + "  " +
+        "c = " + fmt(this.quatern_c) + "  " +
+        "d = " + fmt(this.quatern_d) + "\n");
+
+    string += ("Quaternion Offsets:  " +
+        "x = " + this.qoffset_x + "  " +
+        "y = " + this.qoffset_y + "  " +
+        "z = " + this.qoffset_z + "\n");
+
+    string += ("S-Form Parameters X: " +
+        fmt(this.affine[0][0]) + ", " +
+        fmt(this.affine[0][1]) + ", " +
+        fmt(this.affine[0][2]) + ", " +
+        fmt(this.affine[0][3]) + "\n");
+
+    string += ("S-Form Parameters Y: " +
+        fmt(this.affine[1][0]) + ", " +
+        fmt(this.affine[1][1]) + ", " +
+        fmt(this.affine[1][2]) + ", " +
+        fmt(this.affine[1][3]) + "\n");
+
+    string += ("S-Form Parameters Z: " +
+        fmt(this.affine[2][0]) + ", " +
+        fmt(this.affine[2][1]) + ", " +
+        fmt(this.affine[2][2]) + ", " +
+        fmt(this.affine[2][3]) + "\n");
+
+    string += ("Intent Name: \"" + this.intent_name + "\"\n");
+
+    return string;
+};
+
+
+
 /*** Exports ***/
 
 var moduleType = typeof module;

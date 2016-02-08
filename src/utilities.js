@@ -96,6 +96,31 @@ nifti.Utils.toArrayBuffer = function (buffer) {
 
 
 
+nifti.Utils.isString = function (obj) {
+    return (typeof obj === "string" || obj instanceof String);
+};
+
+
+nifti.Utils.formatNumber = function (num, shortFormat) {
+    var val = 0;
+
+    if (nifti.Utils.isString(num)) {
+        val = Number(num);
+    } else {
+        val = num;
+    }
+
+    if (shortFormat) {
+        val = val.toPrecision(5);
+    } else {
+        val = val.toPrecision(7);
+    }
+
+    return parseFloat(val);
+};
+
+
+
 // http://stackoverflow.com/questions/18638900/javascript-crc32
 nifti.Utils.makeCRCTable = function(){
     var c;
