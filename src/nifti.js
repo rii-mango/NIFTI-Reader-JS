@@ -114,7 +114,7 @@ nifti.readImage = function (header, data) {
 
 nifti.readExtension = function (header, data) {
     var loc = header.getExtensionLocation(),
-        size = nifti.Utils.getIntAt(new DataView(data), loc, header.littleEndian);
+        size = header.extensionSize;
 
     return data.slice(loc, loc + size);
 };
@@ -123,7 +123,7 @@ nifti.readExtension = function (header, data) {
 
 nifti.readExtensionData = function (header, data) {
     var loc = header.getExtensionLocation(),
-        size = nifti.Utils.getIntAt(new DataView(data), loc, header.littleEndian);
+        size = header.extensionSize;
 
     return data.slice(loc + 8, loc + size - 8);
 };

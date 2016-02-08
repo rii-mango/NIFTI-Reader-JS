@@ -149,6 +149,11 @@ nifti.NIFTI2.prototype.readHeader = function (data) {
         this.extensionFlag[1] = nifti.Utils.getByteAt(rawData, 540 + 1);
         this.extensionFlag[2] = nifti.Utils.getByteAt(rawData, 540 + 2);
         this.extensionFlag[3] = nifti.Utils.getByteAt(rawData, 540 + 3);
+
+        if (this.extensionFlag[0]) {
+            this.extensionSize = this.getExtensionSize(rawData);
+            this.extensionCode = this.getExtensionCode(rawData);
+        }
     }
 };
 
@@ -249,6 +254,8 @@ nifti.NIFTI2.prototype.getExtensionLocation = function() {
 
 
 
+nifti.NIFTI2.prototype.getExtensionSize = nifti.NIFTI1.prototype.getExtensionSize;
+nifti.NIFTI2.prototype.getExtensionCode = nifti.NIFTI1.prototype.getExtensionCode;
 nifti.NIFTI2.prototype.getDatatypeCodeString = nifti.NIFTI1.prototype.getDatatypeCodeString;
 nifti.NIFTI2.prototype.getTransformCodeString = nifti.NIFTI1.prototype.getTransformCodeString;
 nifti.NIFTI2.prototype.getUnitsCodeString = nifti.NIFTI1.prototype.getUnitsCodeString;
