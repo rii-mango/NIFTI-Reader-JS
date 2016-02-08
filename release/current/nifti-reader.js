@@ -6530,6 +6530,12 @@ nifti.readHeader = function (data) {
 
 
 
+nifti.hasExtension = function (nifti) {
+    return (nifti.extensionFlag[0] != 0);
+};
+
+
+
 nifti.readImage = function (nifti, data) {
     var imageOffset = nifti.vox_offset;
     var imageSize = nifti.dims[1] * nifti.dims[2] * nifti.dims[3] * nifti.dims[4] * (nifti.numBitsPerVoxel / 8);
@@ -6594,6 +6600,8 @@ nifti.NIFTI1 = nifti.NIFTI1 || function () {
     this.qoffset_z = 0;
     this.affine = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
     this.magic = 0;
+    this.isHDR = false;
+    this.extensionFlag = [0, 0, 0, 0];
 };
 
 
@@ -6643,8 +6651,9 @@ nifti.NIFTI1.UNITS_RADS          = 48;
 // nifti1 codes
 nifti.NIFTI1.MAGIC_COOKIE = 348;
 nifti.NIFTI1.MAGIC_NUMBER_LOCATION = 344;
-nifti.NIFTI1.MAGIC_NUMBER = [110, 43, 49];  // n+1
-
+nifti.NIFTI1.MAGIC_NUMBER = [0x6E, 0x2B, 0x31];  // n+1 (.nii)
+nifti.NIFTI1.MAGIC_NUMBER2 = [0x6E, 0x69, 0x31];  // ni1 (.hdr/.img)
+nifti.NIFTI1.EXTENSION_HEADER_SIZE = 8;
 
 
 /*** Prototype Methods ***/
@@ -6731,6 +6740,15 @@ nifti.NIFTI1.prototype.readHeader = function (data) {
 
     this.intent_name = nifti.Utils.getStringAt(rawData, 328, 344);
     this.magic = nifti.Utils.getStringAt(rawData, 344, 348);
+
+    this.isHDR = (this.magic.equals(nifti.NIFTI1.MAGIC_NUMBER2));
+
+    if (rawData.byteLength > nifti.NIFTI1.MAGIC_COOKIE) {
+        this.extensionFlag[0] = nifti.Utils.getByteAt(rawData, 348);
+        this.extensionFlag[1] = nifti.Utils.getByteAt(rawData, 348 + 1);
+        this.extensionFlag[2] = nifti.Utils.getByteAt(rawData, 348 + 2);
+        this.extensionFlag[3] = nifti.Utils.getByteAt(rawData, 348 + 3);
+    }
 };
 
 
