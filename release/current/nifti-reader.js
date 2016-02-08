@@ -6440,19 +6440,17 @@ module.exports = ZStream;
 
 var nifti = nifti || {};
 nifti.NIFTI1 = nifti.NIFTI1 || ((typeof require !== 'undefined') ? require('./nifti1.js') : null);
+nifti.NIFTI2 = nifti.NIFTI2 || ((typeof require !== 'undefined') ? require('./nifti2.js') : null);
 nifti.Utils = nifti.Utils || ((typeof require !== 'undefined') ? require('./utilities.js') : null);
 
 var pako = pako || ((typeof require !== 'undefined') ? require('pako') : null);
 
 
+
 /*** Static Methods ***/
 
-nifti.isNIFTI1 = function (filename, data) {
+nifti.isNIFTI1 = function (data) {
     var buf, mag1, mag2, mag3;
-
-    if (filename && (filename.indexOf(".nii") !== -1)) {
-        return true;
-    }
 
     buf = new DataView(data);
     mag1 = buf.getUint8(nifti.NIFTI1.MAGIC_NUMBER_LOCATION);
@@ -6465,12 +6463,28 @@ nifti.isNIFTI1 = function (filename, data) {
 
 
 
-nifti.isCompressed = function (filename, data) {
-    var buf, magicCookie1, magicCookie2;
+nifti.isNIFTI2 = function (data) {
+    var buf, mag1, mag2, mag3;
 
-    if (filename && (filename.indexOf(".gz") !== -1)) {
-        return true;
-    }
+    buf = new DataView(data);
+    mag1 = buf.getUint8(nifti.NIFTI2.MAGIC_NUMBER_LOCATION);
+    mag2 = buf.getUint8(nifti.NIFTI2.MAGIC_NUMBER_LOCATION + 1);
+    mag3 = buf.getUint8(nifti.NIFTI2.MAGIC_NUMBER_LOCATION + 2);
+
+    return !!((mag1 === nifti.NIFTI2.MAGIC_NUMBER[0]) && (mag2 === nifti.NIFTI2.MAGIC_NUMBER[1]) &&
+    (mag3 === nifti.NIFTI2.MAGIC_NUMBER[2]));
+};
+
+
+
+nifti.isNIFTI = function (data) {
+    return (nifti.isNIFTI1(data) || nifti.isNIFTI2(data));
+};
+
+
+
+nifti.isCompressed = function (data) {
+    var buf, magicCookie1, magicCookie2;
 
     if (data) {
         buf = new DataView(data);
@@ -6491,6 +6505,7 @@ nifti.isCompressed = function (filename, data) {
 };
 
 
+
 nifti.decompress = function (data) {
     return pako.inflate(data).buffer;
 };
@@ -6498,9 +6513,19 @@ nifti.decompress = function (data) {
 
 
 nifti.readHeader = function (data) {
-    var nifti1 = new nifti.NIFTI1();
-    nifti1.readHeader(data);
-    return nifti1;
+    var header = null;
+
+    if (nifti.isNIFTI1(data)) {
+        header = new nifti.NIFTI1();
+    } else if (nifti.isNIFTI2(data)) {
+        header = new nifti.NIFTI2();
+    }
+
+    if (header) {
+        header.readHeader(data);
+    }
+
+    return header;
 };
 
 
@@ -6520,7 +6545,7 @@ if ((moduleType !== 'undefined') && module.exports) {
     module.exports = nifti;
 }
 
-},{"./nifti1.js":18,"./utilities.js":19,"pako":1}],18:[function(require,module,exports){
+},{"./nifti1.js":18,"./nifti2.js":19,"./utilities.js":20,"pako":1}],18:[function(require,module,exports){
 
 /*jslint browser: true, node: true */
 /*global */
@@ -6530,78 +6555,103 @@ if ((moduleType !== 'undefined') && module.exports) {
 /*** Imports ***/
 
 var nifti = nifti || {};
+nifti.Utils = nifti.Utils || ((typeof require !== 'undefined') ? require('./utilities.js') : null);
 
 
 /*** Constructor ***/
 nifti.NIFTI1 = nifti.NIFTI1 || function () {
-        this.littleEndian = false;
-        this.dim_info = 0;
-        this.dims = [];
-        this.intent_p1 = 0;
-        this.intent_p2 = 0;
-        this.intent_p3 = 0;
-        this.intent_code = 0;
-        this.datatypeCode = 0;
-        this.numBitsPerVoxel = 0;
-        this.slice_start = 0;
-        this.slice_end = 0;
-        this.slice_code = 0;
-        this.pixDims = [];
-        this.vox_offset = 0;
-        this.scl_slope = 1;
-        this.scl_inter = 0;
-        this.xyzt_units = 0;
-        this.cal_max = 0;
-        this.cal_min = 0;
-        this.slice_duration = 0;
-        this.toffset = 0;
-        this.description = "";
-        this.aux_file = "";
-        this.intent_name = "";
-        this.qform_code = 0;
-        this.sform_code = 0;
-        this.quatern_b = 0;
-        this.quatern_c = 0;
-        this.quatern_d = 0;
-        this.qoffset_x = 0;
-        this.qoffset_y = 0;
-        this.qoffset_z = 0;
-        this.affine = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
-        this.magic = 0;
-    };
+    this.littleEndian = false;
+    this.dim_info = 0;
+    this.dims = [];
+    this.intent_p1 = 0;
+    this.intent_p2 = 0;
+    this.intent_p3 = 0;
+    this.intent_code = 0;
+    this.datatypeCode = 0;
+    this.numBitsPerVoxel = 0;
+    this.slice_start = 0;
+    this.slice_end = 0;
+    this.slice_code = 0;
+    this.pixDims = [];
+    this.vox_offset = 0;
+    this.scl_slope = 1;
+    this.scl_inter = 0;
+    this.xyzt_units = 0;
+    this.cal_max = 0;
+    this.cal_min = 0;
+    this.slice_duration = 0;
+    this.toffset = 0;
+    this.description = "";
+    this.aux_file = "";
+    this.intent_name = "";
+    this.qform_code = 0;
+    this.sform_code = 0;
+    this.quatern_b = 0;
+    this.quatern_c = 0;
+    this.quatern_d = 0;
+    this.qoffset_x = 0;
+    this.qoffset_y = 0;
+    this.qoffset_z = 0;
+    this.affine = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
+    this.magic = 0;
+};
+
 
 
 /*** Static Pseudo-constants ***/
 
+// datatype codes
+nifti.NIFTI1.TYPE_NONE            = 0;
+nifti.NIFTI1.TYPE_BINARY          = 1;
+nifti.NIFTI1.TYPE_UINT8           = 2;
+nifti.NIFTI1.TYPE_INT16           = 4;
+nifti.NIFTI1.TYPE_INT32           = 8;
+nifti.NIFTI1.TYPE_FLOAT32        = 16;
+nifti.NIFTI1.TYPE_COMPLEX64      = 32;
+nifti.NIFTI1.TYPE_FLOAT64        = 64;
+nifti.NIFTI1.TYPE_RGB24         = 128;
+nifti.NIFTI1.TYPE_INT8          = 256;
+nifti.NIFTI1.TYPE_UINT16        = 512;
+nifti.NIFTI1.TYPE_UINT32        = 768;
+nifti.NIFTI1.TYPE_INT64        = 1024;
+nifti.NIFTI1.TYPE_UINT64       = 1280;
+nifti.NIFTI1.TYPE_FLOAT128     = 1536;
+nifti.NIFTI1.TYPE_COMPLEX128   = 1792;
+nifti.NIFTI1.TYPE_COMPLEX256   = 2048;
+
+// transform codes
+nifti.NIFTI1.XFORM_UNKNOWN        = 0;
+nifti.NIFTI1.XFORM_SCANNER_ANAT   = 1;
+nifti.NIFTI1.XFORM_ALIGNED_ANAT   = 2;
+nifti.NIFTI1.XFORM_TALAIRACH      = 3;
+nifti.NIFTI1.XFORM_MNI_152        = 4;
+
+// unit codes
+nifti.NIFTI1.SPATIAL_UNITS_MASK = 0x07;
+nifti.NIFTI1.TEMPORAL_UNITS_MASK = 0x38;
+nifti.NIFTI1.UNITS_UNKNOWN        = 0;
+nifti.NIFTI1.UNITS_METER          = 1;
+nifti.NIFTI1.UNITS_MM             = 2;
+nifti.NIFTI1.UNITS_MICRON         = 3;
+nifti.NIFTI1.UNITS_SEC            = 8;
+nifti.NIFTI1.UNITS_MSEC          = 16;
+nifti.NIFTI1.UNITS_USEC          = 24;
+nifti.NIFTI1.UNITS_HZ            = 32;
+nifti.NIFTI1.UNITS_PPM           = 40;
+nifti.NIFTI1.UNITS_RADS          = 48;
+
+// nifti1 codes
 nifti.NIFTI1.MAGIC_COOKIE = 348;
-nifti.NIFTI1.NII_HDR_SIZE = 352;
-nifti.NIFTI1.DT_NONE                    = 0;
-nifti.NIFTI1.DT_BINARY                  = 1;
-nifti.NIFTI1.NIFTI1_TYPE_UINT8           = 2;
-nifti.NIFTI1.NIFTI1_TYPE_INT16           = 4;
-nifti.NIFTI1.NIFTI1_TYPE_INT32           = 8;
-nifti.NIFTI1.NIFTI1_TYPE_FLOAT32        = 16;
-nifti.NIFTI1.NIFTI1_TYPE_COMPLEX64      = 32;
-nifti.NIFTI1.NIFTI1_TYPE_FLOAT64        = 64;
-nifti.NIFTI1.NIFTI1_TYPE_RGB24         = 128;
-nifti.NIFTI1.DT_ALL                   = 255;
-nifti.NIFTI1.NIFTI1_TYPE_INT8          = 256;
-nifti.NIFTI1.NIFTI1_TYPE_UINT16        = 512;
-nifti.NIFTI1.NIFTI1_TYPE_UINT32        = 768;
-nifti.NIFTI1.NIFTI1_TYPE_INT64        = 1024;
-nifti.NIFTI1.NIFTI1_TYPE_UINT64       = 1280;
-nifti.NIFTI1.NIFTI1_TYPE_FLOAT128     = 1536;
-nifti.NIFTI1.NIFTI1_TYPE_COMPLEX128   = 1792;
-nifti.NIFTI1.NIFTI1_TYPE_COMPLEX256   = 2048;
-nifti.NIFTI1.MAGIC_NUMBER_LOCATION   = 344;
-nifti.NIFTI1.MAGIC_NUMBER            = [110, 43, 49];  // n+1
+nifti.NIFTI1.MAGIC_NUMBER_LOCATION = 344;
+nifti.NIFTI1.MAGIC_NUMBER = [110, 43, 49];  // n+1
+
 
 
 /*** Prototype Methods ***/
 
 nifti.NIFTI1.prototype.readHeader = function (data) {
     var rawData = new DataView(data),
-        magicCookieVal = this.getIntAt(rawData, 0, this.littleEndian),
+        magicCookieVal = nifti.Utils.getIntAt(rawData, 0, this.littleEndian),
         ctr,
         ctrOut,
         ctrIn,
@@ -6609,67 +6659,68 @@ nifti.NIFTI1.prototype.readHeader = function (data) {
 
     if (magicCookieVal !== nifti.NIFTI1.MAGIC_COOKIE) {  // try as little endian
         this.littleEndian = true;
-        magicCookieVal = this.getIntAt(rawData, 0, this.littleEndian);
+        magicCookieVal = nifti.Utils.getIntAt(rawData, 0, this.littleEndian);
     }
 
     if (magicCookieVal !== nifti.NIFTI1.MAGIC_COOKIE) {
         throw new Error("This does not appear to be a NIFTI file!");
     }
 
-    this.dim_info = this.getByteAt(rawData, 39);
+    this.dim_info = nifti.Utils.getByteAt(rawData, 39);
 
     for (ctr = 0; ctr < 8; ctr += 1) {
         index = 40 + (ctr * 2);
-        this.dims[ctr] = this.getShortAt(rawData, index, this.littleEndian);
+        this.dims[ctr] = nifti.Utils.getShortAt(rawData, index, this.littleEndian);
     }
 
-    this.intent_p1 = this.getFloatAt(rawData, 56, this.littleEndian);
-    this.intent_p2 = this.getFloatAt(rawData, 60, this.littleEndian);
-    this.intent_p3 = this.getFloatAt(rawData, 64, this.littleEndian);
-    this.intent_code = this.getShortAt(rawData, 68, this.littleEndian);
+    this.intent_p1 = nifti.Utils.getFloatAt(rawData, 56, this.littleEndian);
+    this.intent_p2 = nifti.Utils.getFloatAt(rawData, 60, this.littleEndian);
+    this.intent_p3 = nifti.Utils.getFloatAt(rawData, 64, this.littleEndian);
+    this.intent_code = nifti.Utils.getShortAt(rawData, 68, this.littleEndian);
 
-    this.datatypeCode = this.getShortAt(rawData, 70, this.littleEndian);
-    this.numBitsPerVoxel = this.getShortAt(rawData, 72, this.littleEndian);
+    this.datatypeCode = nifti.Utils.getShortAt(rawData, 70, this.littleEndian);
+    this.numBitsPerVoxel = nifti.Utils.getShortAt(rawData, 72, this.littleEndian);
 
-    this.slice_start = this.getShortAt(rawData, 74, this.littleEndian);
+    this.slice_start = nifti.Utils.getShortAt(rawData, 74, this.littleEndian);
 
     for (ctr = 0; ctr < 8; ctr += 1) {
         index = 76 + (ctr * 4);
-        this.pixDims[ctr] = this.getFloatAt(rawData, index, this.littleEndian);
+        this.pixDims[ctr] = nifti.Utils.getFloatAt(rawData, index, this.littleEndian);
     }
 
-    this.vox_offset = this.getFloatAt(rawData, 108, this.littleEndian);
+    this.vox_offset = nifti.Utils.getFloatAt(rawData, 108, this.littleEndian);
 
-    this.scl_slope = this.getFloatAt(rawData, 112, this.littleEndian);
-    this.scl_inter = this.getFloatAt(rawData, 116, this.littleEndian);
+    this.scl_slope = nifti.Utils.getFloatAt(rawData, 112, this.littleEndian);
+    this.scl_inter = nifti.Utils.getFloatAt(rawData, 116, this.littleEndian);
 
-    this.slice_end = this.getShortAt(rawData, 120, this.littleEndian);
-    this.slice_code = this.getByteAt(rawData, 122);
+    this.slice_end = nifti.Utils.getShortAt(rawData, 120, this.littleEndian);
+    this.slice_code = nifti.Utils.getByteAt(rawData, 122);
 
-    this.xyzt_units = this.getByteAt(rawData, 123);
+    this.xyzt_units = nifti.Utils.getByteAt(rawData, 123);
 
-    this.cal_max = this.getFloatAt(rawData, 124, this.littleEndian);
-    this.cal_min = this.getFloatAt(rawData, 128, this.littleEndian);
+    this.cal_max = nifti.Utils.getFloatAt(rawData, 124, this.littleEndian);
+    this.cal_min = nifti.Utils.getFloatAt(rawData, 128, this.littleEndian);
 
-    this.slice_duration = this.getFloatAt(rawData, 132, this.littleEndian);
-    this.toffset = this.getFloatAt(rawData, 136, this.littleEndian);
+    this.slice_duration = nifti.Utils.getFloatAt(rawData, 132, this.littleEndian);
+    this.toffset = nifti.Utils.getFloatAt(rawData, 136, this.littleEndian);
 
-    this.description = this.getStringAt(rawData, 148, 228);
+    this.description = nifti.Utils.getStringAt(rawData, 148, 228);
+    this.aux_file = nifti.Utils.getStringAt(rawData, 228, 252);
 
-    this.qform_code = this.getShortAt(rawData, 252, this.littleEndian);
-    this.sform_code = this.getShortAt(rawData, 254, this.littleEndian);
+    this.qform_code = nifti.Utils.getShortAt(rawData, 252, this.littleEndian);
+    this.sform_code = nifti.Utils.getShortAt(rawData, 254, this.littleEndian);
 
-    this.quatern_b = this.getFloatAt(rawData, 256, this.littleEndian);
-    this.quatern_c = this.getFloatAt(rawData, 260, this.littleEndian);
-    this.quatern_d = this.getFloatAt(rawData, 264, this.littleEndian);
-    this.qoffset_x = this.getFloatAt(rawData, 268, this.littleEndian);
-    this.qoffset_y = this.getFloatAt(rawData, 272, this.littleEndian);
-    this.qoffset_z = this.getFloatAt(rawData, 276, this.littleEndian);
+    this.quatern_b = nifti.Utils.getFloatAt(rawData, 256, this.littleEndian);
+    this.quatern_c = nifti.Utils.getFloatAt(rawData, 260, this.littleEndian);
+    this.quatern_d = nifti.Utils.getFloatAt(rawData, 264, this.littleEndian);
+    this.qoffset_x = nifti.Utils.getFloatAt(rawData, 268, this.littleEndian);
+    this.qoffset_y = nifti.Utils.getFloatAt(rawData, 272, this.littleEndian);
+    this.qoffset_z = nifti.Utils.getFloatAt(rawData, 276, this.littleEndian);
 
     for (ctrOut = 0; ctrOut < 3; ctrOut += 1) {
         for (ctrIn = 0; ctrIn < 4; ctrIn += 1) {
             index = 280 + (((ctrOut * 4) + ctrIn) * 4);
-            this.affine[ctrOut][ctrIn] = this.getFloatAt(rawData, index, this.littleEndian);
+            this.affine[ctrOut][ctrIn] = nifti.Utils.getFloatAt(rawData, index, this.littleEndian);
         }
     }
 
@@ -6678,14 +6729,177 @@ nifti.NIFTI1.prototype.readHeader = function (data) {
     this.affine[3][2] = 0;
     this.affine[3][3] = 1;
 
-    this.intent_name = this.getStringAt(rawData, 328, 344);
-    this.magic = this.getStringAt(rawData, 344, 348);
+    this.intent_name = nifti.Utils.getStringAt(rawData, 328, 344);
+    this.magic = nifti.Utils.getStringAt(rawData, 344, 348);
 };
 
 
 
+nifti.NIFTI1.prototype.toFormattedString = function () {
+    var fmt = nifti.Utils.formatNumber,
+        string = "";
+
+    string += ("Dim Info = " + this.dim_info + "\n");
+
+    string += ("Image Dimensions (1-8): " +
+        this.dims[0] + ", " +
+        this.dims[1] + ", " +
+        this.dims[2] + ", " +
+        this.dims[3] + ", " +
+        this.dims[4] + ", " +
+        this.dims[5] + ", " +
+        this.dims[6] + ", " +
+        this.dims[7] + "\n");
+
+    string += ("Intent Parameters (1-3): " +
+        this.intent_p1 + ", " +
+        this.intent_p2 + ", " +
+        this.intent_p3) + "\n";
+
+    string += ("Intent Code = " + this.intent_code + "\n");
+    string += ("Datatype = " + this.datatypeCode +  " (" + this.getDatatypeCodeString(this.datatypeCode) + ")\n");
+    string += ("Bits Per Voxel = " + this.numBitsPerVoxel + "\n");
+    string += ("Slice Start = " + this.slice_start + "\n");
+    string += ("Voxel Dimensions (1-8): " +
+        fmt(this.pixDims[0]) + ", " +
+        fmt(this.pixDims[1]) + ", " +
+        fmt(this.pixDims[2]) + ", " +
+        fmt(this.pixDims[3]) + ", " +
+        fmt(this.pixDims[4]) + ", " +
+        fmt(this.pixDims[5]) + ", " +
+        fmt(this.pixDims[6]) + ", " +
+        fmt(this.pixDims[7]) + "\n");
+
+    string += ("Image Offset = " + this.vox_offset + "\n");
+    string += ("Data Scale:  Slope = " + this.scl_slope + "  Intercept = " + this.scl_inter+ "\n");
+    string += ("Slice End = " + this.slice_end + "\n");
+    string += ("Slice Code = " + this.slice_code + "\n");
+    string += ("Units Code = " + this.xyzt_units + " (" + this.getUnitsCodeString(nifti.NIFTI1.SPATIAL_UNITS_MASK & this.xyzt_units) + ", " + this.getUnitsCodeString(nifti.NIFTI1.TEMPORAL_UNITS_MASK & this.xyzt_units) + ")\n");
+    string += ("Display Range:  Max = " + this.cal_max + "  Min = " + this.cal_min + "\n");
+    string += ("Slice Duration = " + this.slice_duration + "\n");
+    string += ("Time Axis Shift = " + this.toffset + "\n");
+    string += ("Description: \"" + this.description + "\"\n");
+    string += ("Auxiliary File: \"" + this.aux_file + "\"\n");
+    string += ("Q-Form Code = " + this.qform_code + " (" + this.getTransformCodeString(this.qform_code) + ")\n");
+    string += ("S-Form Code = " + this.sform_code + " (" + this.getTransformCodeString(this.sform_code) + ")\n");
+    string += ("Quaternion Parameters:  " +
+        "b = " + fmt(this.quatern_b) + "  " +
+        "c = " + fmt(this.quatern_c) + "  " +
+        "d = " + fmt(this.quatern_d) + "\n");
+
+    string += ("Quaternion Offsets:  " +
+        "x = " + this.qoffset_x + "  " +
+        "y = " + this.qoffset_y + "  " +
+        "z = " + this.qoffset_z + "\n");
+
+    string += ("S-Form Parameters X: " +
+        fmt(this.affine[0][0]) + ", " +
+        fmt(this.affine[0][1]) + ", " +
+        fmt(this.affine[0][2]) + ", " +
+        fmt(this.affine[0][3]) + "\n");
+
+    string += ("S-Form Parameters Y: " +
+        fmt(this.affine[1][0]) + ", " +
+        fmt(this.affine[1][1]) + ", " +
+        fmt(this.affine[1][2]) + ", " +
+        fmt(this.affine[1][3]) + "\n");
+
+    string += ("S-Form Parameters Z: " +
+        fmt(this.affine[2][0]) + ", " +
+        fmt(this.affine[2][1]) + ", " +
+        fmt(this.affine[2][2]) + ", " +
+        fmt(this.affine[2][3]) + "\n");
+
+    string += ("Intent Name: \"" + this.intent_name + "\"\n");
+
+    return string;
+};
+
+
+
+
+nifti.NIFTI1.prototype.getDatatypeCodeString = function (code) {
+    if (code === nifti.NIFTI1.TYPE_UINT8) {
+        return "1-Byte Unsigned Integer";
+    } else if (code === nifti.NIFTI1.TYPE_INT16) {
+        return "2-Byte Signed Integer";
+    } else if (code === nifti.NIFTI1.TYPE_INT32) {
+        return "4-Byte Signed Integer";
+    } else if (code === nifti.NIFTI1.TYPE_FLOAT32) {
+        return "4-Byte Float";
+    } else if (code === nifti.NIFTI1.TYPE_FLOAT64) {
+        return "8-Byte Float";
+    } else if (code === nifti.NIFTI1.TYPE_RGB24) {
+        return "RGB";
+    } else if (code === nifti.NIFTI1.TYPE_INT8) {
+        return "1-Byte Signed Integer";
+    } else if (code === nifti.NIFTI1.TYPE_UINT16) {
+        return "2-Byte Unsigned Integer";
+    } else if (code === nifti.NIFTI1.TYPE_UINT32) {
+        return "4-Byte Unsigned Integer";
+    } else if (code === nifti.NIFTI1.TYPE_INT64) {
+        return "8-Byte Signed Integer";
+    } else if (code === nifti.NIFTI1.TYPE_UINT64) {
+        return "8-Byte Unsigned Integer";
+    } else {
+        return "Unknown";
+    }
+};
+
+
+
+nifti.NIFTI1.prototype.getTransformCodeString = function (code) {
+    if (code === nifti.NIFTI1.XFORM_SCANNER_ANAT) {
+        return "Scanner";
+    } else if (code === nifti.NIFTI1.XFORM_ALIGNED_ANAT) {
+        return "Aligned";
+    } else if (code === nifti.NIFTI1.XFORM_TALAIRACH) {
+        return "Talairach";
+    } else if (code === nifti.NIFTI1.XFORM_MNI_152) {
+        return "MNI";
+    } else {
+        return "Unknown";
+    }
+};
+
+
+
+nifti.NIFTI1.prototype.getUnitsCodeString = function (code) {
+    if (code === nifti.NIFTI1.UNITS_METER) {
+        return "Meters";
+    } else if (code === nifti.NIFTI1.UNITS_MM) {
+        return "Millimeters";
+    } else if (code === nifti.NIFTI1.UNITS_MICRON) {
+        return "Microns";
+    } else if (code === nifti.NIFTI1.UNITS_SEC) {
+        return "Seconds";
+    } else if (code === nifti.NIFTI1.UNITS_MSEC) {
+        return "Milliseconds";
+    } else if (code === nifti.NIFTI1.UNITS_USEC) {
+        return "Microseconds";
+    } else if (code === nifti.NIFTI1.UNITS_HZ) {
+        return "Hz";
+    } else if (code === nifti.NIFTI1.UNITS_PPM) {
+        return "PPM";
+    } else if (code === nifti.NIFTI1.UNITS_RADS) {
+        return "Rads";
+    } else {
+        return "Unknown";
+    }
+};
+
+
+
+nifti.NIFTI1.prototype.getQformMat = function () {
+    return this.convertNiftiQFormToNiftiSForm(this.quatern_b, this.quatern_c, this.quatern_d, this.qoffset_x,
+        this.qoffset_y, this.qoffset_z, this.pixDims[1], this.pixDims[2], this.pixDims[3], this.pixDims[0]);
+};
+
+
+
+// http://nifti.nimh.nih.gov/pub/dist/src/niftilib/nifti1_io.c
 nifti.NIFTI1.prototype.convertNiftiQFormToNiftiSForm = function (qb, qc, qd, qx, qy, qz, dx, dy, dz,
-                                                                              qfac) {
+                                                qfac) {
     var R = [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]],
         a,
         b = qb,
@@ -6742,6 +6956,7 @@ nifti.NIFTI1.prototype.convertNiftiQFormToNiftiSForm = function (qb, qc, qd, qx,
 
 
 
+// http://nifti.nimh.nih.gov/pub/dist/src/niftilib/nifti1_io.c
 nifti.NIFTI1.prototype.convertNiftiSFormToNEMA = function (R) {
     var xi, xj, xk, yi, yj, yk, zi, zj, zk, val, detQ, detP, i, j, k, p, q, r, ibest, jbest, kbest, pbest, qbest, rbest,
         M, vbest, Q, P, iChar, jChar, kChar, iSense, jSense, kSense;
@@ -7019,6 +7234,7 @@ nifti.NIFTI1.prototype.convertNiftiSFormToNEMA = function (R) {
 
 
 
+// http://nifti.nimh.nih.gov/pub/dist/src/niftilib/nifti1_io.c
 nifti.NIFTI1.prototype.nifti_mat33_mul = function (A, B) {
     var C = [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
         i,
@@ -7035,6 +7251,7 @@ nifti.NIFTI1.prototype.nifti_mat33_mul = function (A, B) {
 
 
 
+// http://nifti.nimh.nih.gov/pub/dist/src/niftilib/nifti1_io.c
 nifti.NIFTI1.prototype.nifti_mat33_determ = function (R) {
     var r11, r12, r13, r21, r22, r23, r31, r32, r33;
     /*  INPUT MATRIX:  */
@@ -7053,7 +7270,294 @@ nifti.NIFTI1.prototype.nifti_mat33_determ = function (R) {
 
 
 
-nifti.NIFTI1.prototype.getStringAt = function (data, start, end) {
+/*** Exports ***/
+
+var moduleType = typeof module;
+if ((moduleType !== 'undefined') && module.exports) {
+    module.exports = nifti.NIFTI1;
+}
+
+},{"./utilities.js":20}],19:[function(require,module,exports){
+
+/*jslint browser: true, node: true */
+/*global */
+
+"use strict";
+
+/*** Imports ***/
+
+var nifti = nifti || {};
+nifti.Utils = nifti.Utils || ((typeof require !== 'undefined') ? require('./utilities.js') : null);
+nifti.NIFTI1 = nifti.NIFTI1 || ((typeof require !== 'undefined') ? require('./nifti1.js') : null);
+
+
+/*** Constructor ***/
+nifti.NIFTI2 = nifti.NIFTI2 || function () {
+        this.littleEndian = false;
+        this.dim_info = 0;
+        this.dims = [];
+        this.intent_p1 = 0;
+        this.intent_p2 = 0;
+        this.intent_p3 = 0;
+        this.intent_code = 0;
+        this.datatypeCode = 0;
+        this.numBitsPerVoxel = 0;
+        this.slice_start = 0;
+        this.slice_end = 0;
+        this.slice_code = 0;
+        this.pixDims = [];
+        this.vox_offset = 0;
+        this.scl_slope = 1;
+        this.scl_inter = 0;
+        this.xyzt_units = 0;
+        this.cal_max = 0;
+        this.cal_min = 0;
+        this.slice_duration = 0;
+        this.toffset = 0;
+        this.description = "";
+        this.aux_file = "";
+        this.intent_name = "";
+        this.qform_code = 0;
+        this.sform_code = 0;
+        this.quatern_b = 0;
+        this.quatern_c = 0;
+        this.quatern_d = 0;
+        this.qoffset_x = 0;
+        this.qoffset_y = 0;
+        this.qoffset_z = 0;
+        this.affine = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
+        this.magic = 0;
+    };
+
+
+
+/*** Static Pseudo-constants ***/
+
+nifti.NIFTI2.MAGIC_COOKIE = 540;
+nifti.NIFTI2.MAGIC_NUMBER_LOCATION = 4;
+nifti.NIFTI2.MAGIC_NUMBER = [0x6E, 0x2B, 0x32, 0, 0x0D, 0x0A, 0x1A, 0x0A];  // n+2\0
+
+
+
+/*** Prototype Methods ***/
+
+nifti.NIFTI2.prototype.readHeader = function (data) {
+    var rawData = new DataView(data),
+        magicCookieVal = nifti.Utils.getIntAt(rawData, 0, this.littleEndian),
+        ctr,
+        ctrOut,
+        ctrIn,
+        index,
+        array;
+
+    if (magicCookieVal !== nifti.NIFTI2.MAGIC_COOKIE) {  // try as little endian
+        this.littleEndian = true;
+        magicCookieVal = nifti.Utils.getIntAt(rawData, 0, this.littleEndian);
+    }
+
+    if (magicCookieVal !== nifti.NIFTI2.MAGIC_COOKIE) {
+        throw new Error("This does not appear to be a NIFTI file!");
+    }
+
+    this.datatypeCode = nifti.Utils.getShortAt(rawData, 12, this.littleEndian);
+    this.numBitsPerVoxel = nifti.Utils.getShortAt(rawData, 14, this.littleEndian);
+
+    for (ctr = 0; ctr < 8; ctr += 1) {
+        index = 16 + (ctr * 8);
+        this.dims[ctr] = nifti.Utils.getLongAt(rawData, index, this.littleEndian);
+    }
+
+    this.intent_p1 = nifti.Utils.getDoubleAt(rawData, 80, this.littleEndian);
+    this.intent_p2 = nifti.Utils.getDoubleAt(rawData, 88, this.littleEndian);
+    this.intent_p3 = nifti.Utils.getDoubleAt(rawData, 96, this.littleEndian);
+
+    for (ctr = 0; ctr < 8; ctr += 1) {
+        index = 104 + (ctr * 8);
+        this.pixDims[ctr] = nifti.Utils.getDoubleAt(rawData, index, this.littleEndian);
+    }
+
+    this.vox_offset = nifti.Utils.getLongAt(rawData, 168, this.littleEndian);
+
+    this.scl_slope = nifti.Utils.getDoubleAt(rawData, 176, this.littleEndian);
+    this.scl_inter = nifti.Utils.getDoubleAt(rawData, 184, this.littleEndian);
+
+    this.cal_max = nifti.Utils.getDoubleAt(rawData, 192, this.littleEndian);
+    this.cal_min = nifti.Utils.getDoubleAt(rawData, 200, this.littleEndian);
+
+    this.slice_duration = nifti.Utils.getDoubleAt(rawData, 208, this.littleEndian);
+
+    this.toffset = nifti.Utils.getDoubleAt(rawData, 216, this.littleEndian);
+
+    this.slice_start = nifti.Utils.getLongAt(rawData, 224, this.littleEndian);
+    this.slice_end = nifti.Utils.getLongAt(rawData, 232, this.littleEndian);
+
+    this.description = nifti.Utils.getStringAt(rawData, 240, 240 + 80);
+    this.aux_file = nifti.Utils.getStringAt(rawData, 320, 320 + 24);
+
+    this.qform_code = nifti.Utils.getIntAt(rawData, 344, this.littleEndian);
+    this.sform_code = nifti.Utils.getIntAt(rawData, 348, this.littleEndian);
+
+    this.quatern_b = nifti.Utils.getDoubleAt(rawData, 352, this.littleEndian);
+    this.quatern_c = nifti.Utils.getDoubleAt(rawData, 360, this.littleEndian);
+    this.quatern_d = nifti.Utils.getDoubleAt(rawData, 368, this.littleEndian);
+    this.qoffset_x = nifti.Utils.getDoubleAt(rawData, 376, this.littleEndian);
+    this.qoffset_y = nifti.Utils.getDoubleAt(rawData, 384, this.littleEndian);
+    this.qoffset_z = nifti.Utils.getDoubleAt(rawData, 392, this.littleEndian);
+
+    for (ctrOut = 0; ctrOut < 3; ctrOut += 1) {
+        for (ctrIn = 0; ctrIn < 4; ctrIn += 1) {
+            index = 400 + (((ctrOut * 4) + ctrIn) * 8);
+            this.affine[ctrOut][ctrIn] = nifti.Utils.getDoubleAt(rawData, index, this.littleEndian);
+        }
+    }
+
+    this.affine[3][0] = 0;
+    this.affine[3][1] = 0;
+    this.affine[3][2] = 0;
+    this.affine[3][3] = 1;
+
+    this.slice_code = nifti.Utils.getIntAt(rawData, 496, this.littleEndian);
+    this.xyzt_units = nifti.Utils.getIntAt(rawData, 500, this.littleEndian);
+    this.intent_code = nifti.Utils.getIntAt(rawData, 504, this.littleEndian);
+    this.intent_name = nifti.Utils.getStringAt(rawData, 508, 508 + 16);
+
+    this.dim_info = nifti.Utils.getByteAt(rawData, 524);
+};
+
+
+
+nifti.NIFTI2.prototype.getQformMat = function () {
+    return nifti.convertNiftiQFormToNiftiSForm(this.quatern_b, this.quatern_c, this.quatern_d, this.qoffset_x,
+        this.qoffset_y, this.qoffset_z, this.pixDims[1], this.pixDims[2], this.pixDims[3], this.pixDims[0]);
+};
+
+
+
+nifti.NIFTI2.prototype.toFormattedString = function () {
+    var fmt = nifti.Utils.formatNumber,
+        string = "";
+
+    string += ("Datatype = " +  + this.datatypeCode + " (" + this.getDatatypeCodeString(this.datatypeCode) + ")\n");
+    string += ("Bits Per Voxel = " + " = " + this.numBitsPerVoxel + "\n");
+    string += ("Image Dimensions" + " (1-8): " +
+        this.dims[0] + ", " +
+        this.dims[1] + ", " +
+        this.dims[2] + ", " +
+        this.dims[3] + ", " +
+        this.dims[4] + ", " +
+        this.dims[5] + ", " +
+        this.dims[6] + ", " +
+        this.dims[7] + "\n");
+
+    string += ("Intent Parameters (1-3): " +
+        this.intent_p1 + ", " +
+        this.intent_p2 + ", " +
+        this.intent_p3) + "\n";
+
+    string += ("Voxel Dimensions (1-8): " +
+        fmt(this.pixDims[0]) + ", " +
+        fmt(this.pixDims[1]) + ", " +
+        fmt(this.pixDims[2]) + ", " +
+        fmt(this.pixDims[3]) + ", " +
+        fmt(this.pixDims[4]) + ", " +
+        fmt(this.pixDims[5]) + ", " +
+        fmt(this.pixDims[6]) + ", " +
+        fmt(this.pixDims[7]) + "\n");
+
+    string += ("Image Offset = " + this.vox_offset + "\n");
+    string += ("Data Scale:  Slope = " + this.scl_slope + "  Intercept = " + this.scl_inter+ "\n");
+    string += ("Display Range:  Max = " + this.cal_max + "  Min = " + this.cal_min + "\n");
+    string += ("Slice Duration = " + this.slice_duration + "\n");
+    string += ("Time Axis Shift = " + this.toffset + "\n");
+    string += ("Slice Start = " + this.slice_start + "\n");
+    string += ("Slice End = " + this.slice_end + "\n");
+    string += ("Description: \"" + this.description + "\"\n");
+    string += ("Auxiliary File: \"" + this.aux_file + "\"\n");
+    string += ("Q-Form Code = " + this.qform_code + " (" + this.getTransformCodeString(this.qform_code) + ")\n");
+    string += ("S-Form Code = " + this.sform_code + " (" + this.getTransformCodeString(this.sform_code) + ")\n");
+    string += ("Quaternion Parameters:  " +
+    "b = " + fmt(this.quatern_b) + "  " +
+    "c = " + fmt(this.quatern_c) + "  " +
+    "d = " + fmt(this.quatern_d) + "\n");
+
+    string += ("Quaternion Offsets:  " +
+    "x = " + this.qoffset_x + "  " +
+    "y = " + this.qoffset_y + "  " +
+    "z = " + this.qoffset_z + "\n");
+
+    string += ("S-Form Parameters X: " +
+    fmt(this.affine[0][0]) + ", " +
+    fmt(this.affine[0][1]) + ", " +
+    fmt(this.affine[0][2]) + ", " +
+    fmt(this.affine[0][3]) + "\n");
+
+    string += ("S-Form Parameters Y: " +
+    fmt(this.affine[1][0]) + ", " +
+    fmt(this.affine[1][1]) + ", " +
+    fmt(this.affine[1][2]) + ", " +
+    fmt(this.affine[1][3]) + "\n");
+
+    string += ("S-Form Parameters Z: " +
+    fmt(this.affine[2][0]) + ", " +
+    fmt(this.affine[2][1]) + ", " +
+    fmt(this.affine[2][2]) + ", " +
+    fmt(this.affine[2][3]) + "\n");
+
+    string += ("Slice Code = " + this.slice_code + "\n");
+    string += ("Units Code = " + this.xyzt_units + " (" + this.getUnitsCodeString(nifti.NIFTI1.SPATIAL_UNITS_MASK & this.xyzt_units) + ", " + this.getUnitsCodeString(nifti.NIFTI1.TEMPORAL_UNITS_MASK & this.xyzt_units) + ")\n");
+    string += ("Intent Code = " + this.intent_code + "\n");
+    string += ("Intent Name: \"" + this.intent_name + "\"\n");
+
+    string += ("Dim Info = " + this.dim_info + "\n");
+
+    return string;
+};
+
+
+
+nifti.NIFTI2.prototype.getDatatypeCodeString = nifti.NIFTI1.prototype.getDatatypeCodeString;
+nifti.NIFTI2.prototype.getTransformCodeString = nifti.NIFTI1.prototype.getTransformCodeString;
+nifti.NIFTI2.prototype.getUnitsCodeString = nifti.NIFTI1.prototype.getUnitsCodeString;
+nifti.NIFTI2.prototype.getQformMat = nifti.NIFTI1.prototype.getQformMat;
+nifti.NIFTI2.prototype.convertNiftiQFormToNiftiSForm = nifti.NIFTI1.prototype.convertNiftiQFormToNiftiSForm;
+nifti.NIFTI2.prototype.convertNiftiSFormToNEMA = nifti.NIFTI1.prototype.convertNiftiSFormToNEMA;
+nifti.NIFTI2.prototype.nifti_mat33_mul = nifti.NIFTI1.prototype.nifti_mat33_mul;
+nifti.NIFTI2.prototype.nifti_mat33_determ = nifti.NIFTI1.prototype.nifti_mat33_determ;
+
+
+
+/*** Exports ***/
+
+var moduleType = typeof module;
+if ((moduleType !== 'undefined') && module.exports) {
+    module.exports = nifti.NIFTI2;
+}
+
+},{"./nifti1.js":18,"./utilities.js":20}],20:[function(require,module,exports){
+
+/*jslint browser: true, node: true */
+/*global require, module */
+
+"use strict";
+
+/*** Imports ***/
+
+var nifti = nifti || {};
+nifti.Utils = nifti.Utils || {};
+
+
+
+/*** Static Pseudo-constants ***/
+
+nifti.Utils.crcTable = null;
+nifti.Utils.GUNZIP_MAGIC_COOKIE1 = 31;
+nifti.Utils.GUNZIP_MAGIC_COOKIE2 = 139;
+
+
+
+/*** Static methods ***/
+
+nifti.Utils.getStringAt = function (data, start, end) {
     var str = "", ctr, ch;
 
     for (ctr = start; ctr < end; ctr += 1) {
@@ -7069,71 +7573,51 @@ nifti.NIFTI1.prototype.getStringAt = function (data, start, end) {
 
 
 
-nifti.NIFTI1.prototype.getByteAt = function (data, start) {
+nifti.Utils.getByteAt = function (data, start) {
     return data.getInt8(start);
 };
 
 
 
-nifti.NIFTI1.prototype.getShortAt = function (data, start, littleEndian) {
+nifti.Utils.getShortAt = function (data, start, littleEndian) {
     return data.getInt16(start, littleEndian);
 };
 
 
 
-nifti.NIFTI1.prototype.getIntAt = function (data, start, littleEndian) {
+nifti.Utils.getIntAt = function (data, start, littleEndian) {
     return data.getInt32(start, littleEndian);
 };
 
 
 
-nifti.NIFTI1.prototype.getFloatAt = function (data, start, littleEndian) {
+nifti.Utils.getFloatAt = function (data, start, littleEndian) {
     return data.getFloat32(start, littleEndian);
 };
 
 
 
-nifti.NIFTI1.prototype.hasError = function () {
-    return (this.error !== null);
+nifti.Utils.getDoubleAt = function (data, start, littleEndian) {
+    return data.getFloat64(start, littleEndian);
 };
 
 
 
-nifti.NIFTI1.prototype.getQformMat = function () {
-    return this.convertNiftiQFormToNiftiSForm(this.quatern_b, this.quatern_c, this.quatern_d, this.qoffset_x,
-        this.qoffset_y, this.qoffset_z, this.pixDims[1], this.pixDims[2], this.pixDims[3], this.pixDims[0]);
+nifti.Utils.getLongAt = function (data, start, littleEndian) {
+    var ctr, array = [], value = 0;
+
+    for (ctr = 0; ctr < 8; ctr += 1) {
+        array[ctr] = nifti.Utils.getByteAt(data, start + ctr, littleEndian);
+    }
+
+    for (ctr = array.length - 1; ctr >= 0; ctr--) {
+        value = (value * 256) + array[ctr];
+    }
+
+    return value;
 };
 
 
-
-/*** Exports ***/
-
-var moduleType = typeof module;
-if ((moduleType !== 'undefined') && module.exports) {
-    module.exports = nifti.NIFTI1;
-}
-
-},{}],19:[function(require,module,exports){
-
-/*jslint browser: true, node: true */
-/*global require, module */
-
-"use strict";
-
-/*** Imports ***/
-
-var nifti = nifti || {};
-nifti.Utils = nifti.Utils || {};
-
-
-/*** Static Pseudo-constants ***/
-
-nifti.Utils.crcTable = null;
-nifti.Utils.GUNZIP_MAGIC_COOKIE1 = 31;
-nifti.Utils.GUNZIP_MAGIC_COOKIE2 = 139;
-
-
-/*** Static methods ***/
 
 nifti.Utils.toArrayBuffer = function (buffer) {
     var ab, view, i;
@@ -7145,6 +7629,32 @@ nifti.Utils.toArrayBuffer = function (buffer) {
     }
     return ab;
 };
+
+
+
+nifti.Utils.isString = function (obj) {
+    return (typeof obj === "string" || obj instanceof String);
+};
+
+
+nifti.Utils.formatNumber = function (num, shortFormat) {
+    var val = 0;
+
+    if (nifti.Utils.isString(num)) {
+        val = Number(num);
+    } else {
+        val = num;
+    }
+
+    if (shortFormat) {
+        val = val.toPrecision(5);
+    } else {
+        val = val.toPrecision(7);
+    }
+
+    return parseFloat(val);
+};
+
 
 
 // http://stackoverflow.com/questions/18638900/javascript-crc32
@@ -7161,6 +7671,8 @@ nifti.Utils.makeCRCTable = function(){
     return crcTable;
 };
 
+
+
 nifti.Utils.crc32 = function(dataView) {
     var crcTable = nifti.Utils.crcTable || (nifti.Utils.crcTable = nifti.Utils.makeCRCTable());
     var crc = 0 ^ (-1);
@@ -7171,6 +7683,7 @@ nifti.Utils.crc32 = function(dataView) {
 
     return (crc ^ (-1)) >>> 0;
 };
+
 
 
 /*** Exports ***/
