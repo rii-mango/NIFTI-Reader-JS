@@ -6530,18 +6530,35 @@ nifti.readHeader = function (data) {
 
 
 
-nifti.hasExtension = function (nifti) {
-    return (nifti.extensionFlag[0] != 0);
+nifti.hasExtension = function (header) {
+    return (header.extensionFlag[0] != 0);
 };
 
 
 
-nifti.readImage = function (nifti, data) {
-    var imageOffset = nifti.vox_offset;
-    var imageSize = nifti.dims[1] * nifti.dims[2] * nifti.dims[3] * nifti.dims[4] * (nifti.numBitsPerVoxel / 8);
+nifti.readImage = function (header, data) {
+    var imageOffset = header.vox_offset;
+    var imageSize = header.dims[1] * header.dims[2] * header.dims[3] * header.dims[4] * (header.numBitsPerVoxel / 8);
     return data.slice(imageOffset, imageOffset + imageSize);
 };
 
+
+
+nifti.readExtension = function (header, data) {
+    var loc = header.getExtensionLocation(),
+        size = header.extensionSize;
+
+    return data.slice(loc, loc + size);
+};
+
+
+
+nifti.readExtensionData = function (header, data) {
+    var loc = header.getExtensionLocation(),
+        size = header.extensionSize;
+
+    return data.slice(loc + 8, loc + size - 8);
+};
 
 
 /*** Exports ***/
@@ -6602,6 +6619,8 @@ nifti.NIFTI1 = nifti.NIFTI1 || function () {
     this.magic = 0;
     this.isHDR = false;
     this.extensionFlag = [0, 0, 0, 0];
+    this.extensionSize = 0;
+    this.extensionCode = 0;
 };
 
 
@@ -6741,13 +6760,18 @@ nifti.NIFTI1.prototype.readHeader = function (data) {
     this.intent_name = nifti.Utils.getStringAt(rawData, 328, 344);
     this.magic = nifti.Utils.getStringAt(rawData, 344, 348);
 
-    this.isHDR = (this.magic.equals(nifti.NIFTI1.MAGIC_NUMBER2));
+    this.isHDR = (this.magic === nifti.NIFTI1.MAGIC_NUMBER2);
 
     if (rawData.byteLength > nifti.NIFTI1.MAGIC_COOKIE) {
         this.extensionFlag[0] = nifti.Utils.getByteAt(rawData, 348);
         this.extensionFlag[1] = nifti.Utils.getByteAt(rawData, 348 + 1);
         this.extensionFlag[2] = nifti.Utils.getByteAt(rawData, 348 + 2);
         this.extensionFlag[3] = nifti.Utils.getByteAt(rawData, 348 + 3);
+
+        if (this.extensionFlag[0]) {
+            this.extensionSize = this.getExtensionSize(rawData);
+            this.extensionCode = this.getExtensionCode(rawData);
+        }
     }
 };
 
@@ -6830,9 +6854,13 @@ nifti.NIFTI1.prototype.toFormattedString = function () {
 
     string += ("Intent Name: \"" + this.intent_name + "\"\n");
 
+    if (this.extensionFlag[0]) {
+        string += ("Extension: Size = " + this.extensionSize + "  Code = " + this.extensionCode + "\n");
+
+    }
+
     return string;
 };
-
 
 
 
@@ -7288,6 +7316,24 @@ nifti.NIFTI1.prototype.nifti_mat33_determ = function (R) {
 
 
 
+nifti.NIFTI1.prototype.getExtensionLocation = function() {
+    return nifti.NIFTI1.MAGIC_COOKIE + 4;
+};
+
+
+
+nifti.NIFTI1.prototype.getExtensionSize = function(data) {
+    return nifti.Utils.getIntAt(data, this.getExtensionLocation(), this.littleEndian);
+};
+
+
+
+nifti.NIFTI1.prototype.getExtensionCode = function(data) {
+    return nifti.Utils.getIntAt(data, this.getExtensionLocation() + 4, this.littleEndian);
+};
+
+
+
 /*** Exports ***/
 
 var moduleType = typeof module;
@@ -7345,6 +7391,7 @@ nifti.NIFTI2 = nifti.NIFTI2 || function () {
         this.qoffset_z = 0;
         this.affine = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
         this.magic = 0;
+        this.extensionFlag = [0, 0, 0, 0];
     };
 
 
@@ -7440,6 +7487,18 @@ nifti.NIFTI2.prototype.readHeader = function (data) {
     this.intent_name = nifti.Utils.getStringAt(rawData, 508, 508 + 16);
 
     this.dim_info = nifti.Utils.getByteAt(rawData, 524);
+
+    if (rawData.byteLength > nifti.NIFTI2.MAGIC_COOKIE) {
+        this.extensionFlag[0] = nifti.Utils.getByteAt(rawData, 540);
+        this.extensionFlag[1] = nifti.Utils.getByteAt(rawData, 540 + 1);
+        this.extensionFlag[2] = nifti.Utils.getByteAt(rawData, 540 + 2);
+        this.extensionFlag[3] = nifti.Utils.getByteAt(rawData, 540 + 3);
+
+        if (this.extensionFlag[0]) {
+            this.extensionSize = this.getExtensionSize(rawData);
+            this.extensionCode = this.getExtensionCode(rawData);
+        }
+    }
 };
 
 
@@ -7533,6 +7592,14 @@ nifti.NIFTI2.prototype.toFormattedString = function () {
 
 
 
+nifti.NIFTI2.prototype.getExtensionLocation = function() {
+    return nifti.NIFTI2.MAGIC_COOKIE + 4;
+};
+
+
+
+nifti.NIFTI2.prototype.getExtensionSize = nifti.NIFTI1.prototype.getExtensionSize;
+nifti.NIFTI2.prototype.getExtensionCode = nifti.NIFTI1.prototype.getExtensionCode;
 nifti.NIFTI2.prototype.getDatatypeCodeString = nifti.NIFTI1.prototype.getDatatypeCodeString;
 nifti.NIFTI2.prototype.getTransformCodeString = nifti.NIFTI1.prototype.getTransformCodeString;
 nifti.NIFTI2.prototype.getUnitsCodeString = nifti.NIFTI1.prototype.getUnitsCodeString;
