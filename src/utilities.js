@@ -61,6 +61,28 @@ nifti.Utils.getFloatAt = function (data, start, littleEndian) {
 
 
 
+nifti.Utils.getDoubleAt = function (data, start, littleEndian) {
+    return data.getFloat64(start, littleEndian);
+};
+
+
+
+nifti.Utils.getLongAt = function (data, start, littleEndian) {
+    var ctr, array = [], value = 0;
+
+    for (ctr = 0; ctr < 8; ctr += 1) {
+        array[ctr] = nifti.Utils.getByteAt(data, start + ctr, littleEndian);
+    }
+
+    for (ctr = array.length - 1; ctr >= 0; ctr--) {
+        value = (value * 256) + array[ctr];
+    }
+
+    return value;
+};
+
+
+
 nifti.Utils.toArrayBuffer = function (buffer) {
     var ab, view, i;
 

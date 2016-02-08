@@ -40,5 +40,23 @@ describe('NIFTI-Reader-JS', function () {
                 done();
             });
         });
+
+        it('dims[1] should be 91', function () {
+            assert.equal(91, nifti2.dims[1]);
+        });
+
+        it('dims[2] should be 109', function () {
+            assert.equal(109, nifti2.dims[2]);
+        });
+
+        it('dims[3] should be 91', function () {
+            assert.equal(91, nifti2.dims[3]);
+        });
+
+        it('image data checksum should equal 471047545', function () {
+            var imageData = nifti.readImage(nifti2, data);
+            var checksum = nifti.Utils.crc32(new DataView(imageData));
+            assert.equal(checksum, 471047545);
+        });
     });
 });

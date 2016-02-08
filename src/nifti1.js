@@ -116,6 +116,7 @@ nifti.NIFTI1.prototype.readHeader = function (data) {
     this.toffset = nifti.Utils.getFloatAt(rawData, 136, this.littleEndian);
 
     this.description = nifti.Utils.getStringAt(rawData, 148, 228);
+    this.aux_file = nifti.Utils.getStringAt(rawData, 228, 252);
 
     this.qform_code = nifti.Utils.getShortAt(rawData, 252, this.littleEndian);
     this.sform_code = nifti.Utils.getShortAt(rawData, 254, this.littleEndian);
