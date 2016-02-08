@@ -14,7 +14,7 @@ if (nifti.isCompressed(data)) {
     data = nifti.decompress(data);
 }
 
-if (nifti.isNIFTI1(data)) {
+if (nifti.isNIFTI(data)) {
     niftiHeader = nifti.readHeader(data);
     console.log(niftiHeader.toFormattedString());
     niftiImage = nifti.readerImage(niftiHeader, data);
