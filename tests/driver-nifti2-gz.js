@@ -37,7 +37,6 @@ describe('NIFTI-Reader-JS', function () {
         it('should not throw error when reading header', function (done) {
             assert.doesNotThrow(function() {
                 nifti2 = nifti.readHeader(data);
-                console.log(nifti2.toFormattedString());
                 done();
             });
         });

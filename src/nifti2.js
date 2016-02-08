@@ -8,6 +8,7 @@
 
 var nifti = nifti || {};
 nifti.Utils = nifti.Utils || ((typeof require !== 'undefined') ? require('./utilities.js') : null);
+nifti.NIFTI1 = nifti.NIFTI1 || ((typeof require !== 'undefined') ? require('./nifti1.js') : null);
 
 
 /*** Constructor ***/
@@ -156,7 +157,7 @@ nifti.NIFTI2.prototype.toFormattedString = function () {
     var fmt = nifti.Utils.formatNumber,
         string = "";
 
-    string += ("Datatype = " +  + this.datatypeCode + "\n");
+    string += ("Datatype = " +  + this.datatypeCode + " (" + this.getDatatypeCodeString(this.datatypeCode) + ")\n");
     string += ("Bits Per Voxel = " + " = " + this.numBitsPerVoxel + "\n");
     string += ("Image Dimensions" + " (1-8): " +
         this.dims[0] + ", " +
@@ -192,8 +193,8 @@ nifti.NIFTI2.prototype.toFormattedString = function () {
     string += ("Slice End = " + this.slice_end + "\n");
     string += ("Description: \"" + this.description + "\"\n");
     string += ("Auxiliary File: \"" + this.aux_file + "\"\n");
-    string += ("Q-Form Code = " + this.qform_code + "\n");
-    string += ("S-Form Code = " + this.sform_code + "\n");
+    string += ("Q-Form Code = " + this.qform_code + " (" + this.getTransformCodeString(this.qform_code) + ")\n");
+    string += ("S-Form Code = " + this.sform_code + " (" + this.getTransformCodeString(this.sform_code) + ")\n");
     string += ("Quaternion Parameters:  " +
     "b = " + fmt(this.quatern_b) + "  " +
     "c = " + fmt(this.quatern_c) + "  " +
@@ -223,7 +224,7 @@ nifti.NIFTI2.prototype.toFormattedString = function () {
     fmt(this.affine[2][3]) + "\n");
 
     string += ("Slice Code = " + this.slice_code + "\n");
-    string += ("Units Code = " + this.xyzt_units + "\n");
+    string += ("Units Code = " + this.xyzt_units + " (" + this.getUnitsCodeString(nifti.NIFTI1.SPATIAL_UNITS_MASK & this.xyzt_units) + ", " + this.getUnitsCodeString(nifti.NIFTI1.TEMPORAL_UNITS_MASK & this.xyzt_units) + ")\n");
     string += ("Intent Code = " + this.intent_code + "\n");
     string += ("Intent Name: \"" + this.intent_name + "\"\n");
 
@@ -231,6 +232,18 @@ nifti.NIFTI2.prototype.toFormattedString = function () {
 
     return string;
 };
+
+
+
+nifti.NIFTI2.prototype.getDatatypeCodeString = nifti.NIFTI1.prototype.getDatatypeCodeString;
+nifti.NIFTI2.prototype.getTransformCodeString = nifti.NIFTI1.prototype.getTransformCodeString;
+nifti.NIFTI2.prototype.getUnitsCodeString = nifti.NIFTI1.prototype.getUnitsCodeString;
+nifti.NIFTI2.prototype.getQformMat = nifti.NIFTI1.prototype.getQformMat;
+nifti.NIFTI2.prototype.convertNiftiQFormToNiftiSForm = nifti.NIFTI1.prototype.convertNiftiQFormToNiftiSForm;
+nifti.NIFTI2.prototype.convertNiftiSFormToNEMA = nifti.NIFTI1.prototype.convertNiftiSFormToNEMA;
+nifti.NIFTI2.prototype.nifti_mat33_mul = nifti.NIFTI1.prototype.nifti_mat33_mul;
+nifti.NIFTI2.prototype.nifti_mat33_determ = nifti.NIFTI1.prototype.nifti_mat33_determ;
+
 
 
 /*** Exports ***/
