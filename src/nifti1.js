@@ -343,7 +343,7 @@ nifti.NIFTI1.prototype.getUnitsCodeString = function (code) {
 
 
 nifti.NIFTI1.prototype.getQformMat = function () {
-    return nifti.convertNiftiQFormToNiftiSForm(this.quatern_b, this.quatern_c, this.quatern_d, this.qoffset_x,
+    return this.convertNiftiQFormToNiftiSForm(this.quatern_b, this.quatern_c, this.quatern_d, this.qoffset_x,
         this.qoffset_y, this.qoffset_z, this.pixDims[1], this.pixDims[2], this.pixDims[3], this.pixDims[0]);
 };
 
@@ -528,7 +528,7 @@ nifti.NIFTI1.prototype.convertNiftiSFormToNEMA = function (R) {
 
     /* at this point, Q is the rotation matrix from the (i,j,k) to (x,y,z) axes */
 
-    detQ = nifti.nifti_mat33_determ(Q);
+    detQ = this.nifti_mat33_determ(Q);
     if (detQ === 0.0) { /* shouldn't happen unless user is a DUFIS */
         return null;
     }
@@ -557,9 +557,9 @@ nifti.NIFTI1.prototype.convertNiftiSFormToNEMA = function (R) {
                                     P[0][i - 1] = p;
                                     P[1][j - 1] = q;
                                     P[2][k - 1] = r;
-                                    detP = nifti.nifti_mat33_determ(P);           /* sign of permutation */
+                                    detP = this.nifti_mat33_determ(P);           /* sign of permutation */
                                     if ((detP * detQ) > 0.0) {
-                                        M = nifti.nifti_mat33_mul(P, Q);
+                                        M = this.nifti_mat33_mul(P, Q);
 
                                         /* angle of M rotation = 2.0*acos(0.5*sqrt(1.0+trace(M)))       */
                                         /* we want largest trace(M) == smallest angle == M nearest to I */
