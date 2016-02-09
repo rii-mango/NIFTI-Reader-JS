@@ -6514,11 +6514,11 @@ nifti.decompress = function (data) {
 
 nifti.readHeader = function (data) {
     var header = null;
-console.log("compressed: " + nifti.isCompressed(data));
+
     if (nifti.isCompressed(data)) {
         data = nifti.decompress(data);
     }
-console.log("1: " + nifti.isNIFTI1(data));
+
     if (nifti.isNIFTI1(data)) {
         header = new nifti.NIFTI1();
     } else if (nifti.isNIFTI2(data)) {
