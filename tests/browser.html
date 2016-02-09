@@ -12,7 +12,7 @@
         function readNIFTI(name, buf) {
             var header = nifti.readHeader(buf);
 
-            var logger = document.getElementById('daikon');
+            var logger = document.getElementById('results');
             logger.innerText = header.toFormattedString();
         }
 
@@ -70,7 +70,7 @@
     <hr />
 </div>
 
-<div id="daikon" style="font-family:sans-serif"></div>
+<div id="results" style="font-family:sans-serif"></div>
 
 <script type="text/javascript">
     document.getElementById('file').addEventListener('change', handleFileSelect, false);
