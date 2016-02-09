@@ -9,17 +9,11 @@
     <script type="text/javascript" src="../release/current/nifti-reader.js"></script>
 
     <script type="text/javascript">
-        function toHTML(str) {
-            str = str.replace(/^\s*/mg, function(x) { return new Array(++x.length).join('&nbsp;&nbsp;') });
-            str = str.replace(/(?:\r\n|\r|\n)/g, '<br />');
-            return str;
-        }
-
         function readNIFTI(name, buf) {
             var header = nifti.readHeader(buf);
 
             var logger = document.getElementById('daikon');
-            logger.innerHTML = toHTML(header.toFormattedString());
+            logger.innerText = header.toFormattedString();
         }
 
         function makeSlice(file, start, length) {
