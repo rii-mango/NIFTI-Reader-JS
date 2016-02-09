@@ -198,8 +198,8 @@ nifti.NIFTI2.prototype.toFormattedString = function () {
         fmt(this.pixDims[7]) + "\n");
 
     string += ("Image Offset = " + this.vox_offset + "\n");
-    string += ("Data Scale:  Slope = " + this.scl_slope + "  Intercept = " + this.scl_inter+ "\n");
-    string += ("Display Range:  Max = " + this.cal_max + "  Min = " + this.cal_min + "\n");
+    string += ("Data Scale:  Slope = " + fmt(this.scl_slope) + "  Intercept = " + fmt(this.scl_inter) + "\n");
+    string += ("Display Range:  Max = " + fmt(this.cal_max) + "  Min = " + fmt(this.cal_min) + "\n");
     string += ("Slice Duration = " + this.slice_duration + "\n");
     string += ("Time Axis Shift = " + this.toffset + "\n");
     string += ("Slice Start = " + this.slice_start + "\n");

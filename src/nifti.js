@@ -83,6 +83,10 @@ nifti.decompress = function (data) {
 nifti.readHeader = function (data) {
     var header = null;
 
+    if (nifti.isCompressed(data)) {
+        data = nifti.decompress(data);
+    }
+
     if (nifti.isNIFTI1(data)) {
         header = new nifti.NIFTI1();
     } else if (nifti.isNIFTI2(data)) {

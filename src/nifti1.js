@@ -242,11 +242,11 @@ nifti.NIFTI1.prototype.toFormattedString = function () {
         fmt(this.pixDims[7]) + "\n");
 
     string += ("Image Offset = " + this.vox_offset + "\n");
-    string += ("Data Scale:  Slope = " + this.scl_slope + "  Intercept = " + this.scl_inter+ "\n");
+    string += ("Data Scale:  Slope = " + fmt(this.scl_slope) + "  Intercept = " + fmt(this.scl_inter) + "\n");
     string += ("Slice End = " + this.slice_end + "\n");
     string += ("Slice Code = " + this.slice_code + "\n");
     string += ("Units Code = " + this.xyzt_units + " (" + this.getUnitsCodeString(nifti.NIFTI1.SPATIAL_UNITS_MASK & this.xyzt_units) + ", " + this.getUnitsCodeString(nifti.NIFTI1.TEMPORAL_UNITS_MASK & this.xyzt_units) + ")\n");
-    string += ("Display Range:  Max = " + this.cal_max + "  Min = " + this.cal_min + "\n");
+    string += ("Display Range:  Max = " + fmt(this.cal_max) + "  Min = " + fmt(this.cal_min) + "\n");
     string += ("Slice Duration = " + this.slice_duration + "\n");
     string += ("Time Axis Shift = " + this.toffset + "\n");
     string += ("Description: \"" + this.description + "\"\n");
