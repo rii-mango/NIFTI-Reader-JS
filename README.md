@@ -5,7 +5,7 @@ A JavaScript [NIfTI](http://nifti.nimh.nih.gov/) file format reader.  This reade
 [Click here](http://rii.uthscsa.edu/mango/niftireader/index.html) to try NIFTI-Reader-JS...
 
 ###Usage
-See the [tests](https://github.com/rii-mango/NIFTI-Reader-JS/tree/master/tests) folder for more examples.
+[API](https://github.com/rii-mango/NIFTI-Reader-JS/wiki/API) and  [more examples](https://github.com/rii-mango/NIFTI-Reader-JS/tree/master/tests)
 
 ```javascript
 var data = // an ArrayBuffer
