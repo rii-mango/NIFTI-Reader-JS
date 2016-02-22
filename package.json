@@ -12,12 +12,14 @@
   "devDependencies": {
     "mocha": "*",
     "browserify": "*",
-    "uglifyjs": "*"
+    "uglifyjs": "*",
+    "jsdoc-to-markdown": "*"
   },
   "scripts": {
     "test": "mocha --timeout 0 tests",
     "build": "rm -rf build; mkdir build; browserify --standalone nifti src/nifti.js -o build/nifti-reader.js; uglifyjs build/nifti-reader.js -o build/nifti-reader-min.js",
-    "release": "rm release/current/*.js; cp build/*.js release/current/."
+    "release": "rm release/current/*.js; cp build/*.js release/current/.",
+    "doc": "rm -rf build; mkdir build; ./node_modules/.bin/jsdoc2md src/*.js > build/docs.md"
   },
   "repository": {
     "type": "git",
