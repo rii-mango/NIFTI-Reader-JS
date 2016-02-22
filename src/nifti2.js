@@ -380,21 +380,10 @@ nifti.NIFTI2.prototype.convertNiftiSFormToNEMA = nifti.NIFTI1.prototype.convertN
 
 
 
-/**
- * Multiplies two 3x3 matrices.  (See http://nifti.nimh.nih.gov/pub/dist/src/niftilib/nifti1_io.c)
- * @param {Array.<Array.<number>>} A
- * @param {Array.<Array.<number>>} B
- * @returns {Array.<Array.<number>>}
- */
 nifti.NIFTI2.prototype.nifti_mat33_mul = nifti.NIFTI1.prototype.nifti_mat33_mul;
 
 
 
-/**
- * Returns the determinant of a 3x3 matrix.  (See http://nifti.nimh.nih.gov/pub/dist/src/niftilib/nifti1_io.c)
- * @param {Array.<Array.<number>>} R
- * @returns {number}
- */
 nifti.NIFTI2.prototype.nifti_mat33_determ = nifti.NIFTI1.prototype.nifti_mat33_determ;
 
 

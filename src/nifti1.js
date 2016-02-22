@@ -793,12 +793,6 @@ nifti.NIFTI1.prototype.convertNiftiSFormToNEMA = function (R) {
 
 
 
-/**
- * Multiplies two 3x3 matrices.  (See http://nifti.nimh.nih.gov/pub/dist/src/niftilib/nifti1_io.c)
- * @param {Array.<Array.<number>>} A
- * @param {Array.<Array.<number>>} B
- * @returns {Array.<Array.<number>>}
- */
 nifti.NIFTI1.prototype.nifti_mat33_mul = function (A, B) {
     var C = [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
         i,
@@ -815,11 +809,6 @@ nifti.NIFTI1.prototype.nifti_mat33_mul = function (A, B) {
 
 
 
-/**
- * Returns the determinant of a 3x3 matrix.  (See http://nifti.nimh.nih.gov/pub/dist/src/niftilib/nifti1_io.c)
- * @param {Array.<Array.<number>>} R
- * @returns {number}
- */
 nifti.NIFTI1.prototype.nifti_mat33_determ = function (R) {
     var r11, r12, r13, r21, r22, r23, r31, r32, r33;
     /*  INPUT MATRIX:  */
