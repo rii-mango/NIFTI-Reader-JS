@@ -12,43 +12,84 @@ nifti.NIFTI1 = nifti.NIFTI1 || ((typeof require !== 'undefined') ? require('./ni
 
 
 /*** Constructor ***/
+
+/**
+ * The NIFTI2 constructor.
+ * @constructor
+ * @property {boolean} littleEndian
+ * @property {number} dim_info
+ * @property {number[]} dims - image dimensions
+ * @property {number} intent_p1
+ * @property {number} intent_p2
+ * @property {number} intent_p3
+ * @property {number} intent_code
+ * @property {number} datatypeCode
+ * @property {number} numBitsPerVoxel
+ * @property {number} slice_start
+ * @property {number} slice_end
+ * @property {number} slice_code
+ * @property {number[]} pixDims - voxel dimensions
+ * @property {number} vox_offset
+ * @property {number} scl_slope
+ * @property {number} scl_inter
+ * @property {number} xyzt_units
+ * @property {number} cal_max
+ * @property {number} cal_min
+ * @property {number} slice_duration
+ * @property {number} toffset
+ * @property {string} description
+ * @property {string} aux_file
+ * @property {string} intent_name
+ * @property {number} qform_code
+ * @property {number} sform_code
+ * @property {number} quatern_b
+ * @property {number} quatern_c
+ * @property {number} quatern_d
+ * @property {number} quatern_x
+ * @property {number} quatern_y
+ * @property {number} quatern_z
+ * @property {Array.<Array.<number>>} affine
+ * @property {string} magic
+ * @property {number[]} extensionFlag
+ * @type {Function}
+ */
 nifti.NIFTI2 = nifti.NIFTI2 || function () {
-        this.littleEndian = false;
-        this.dim_info = 0;
-        this.dims = [];
-        this.intent_p1 = 0;
-        this.intent_p2 = 0;
-        this.intent_p3 = 0;
-        this.intent_code = 0;
-        this.datatypeCode = 0;
-        this.numBitsPerVoxel = 0;
-        this.slice_start = 0;
-        this.slice_end = 0;
-        this.slice_code = 0;
-        this.pixDims = [];
-        this.vox_offset = 0;
-        this.scl_slope = 1;
-        this.scl_inter = 0;
-        this.xyzt_units = 0;
-        this.cal_max = 0;
-        this.cal_min = 0;
-        this.slice_duration = 0;
-        this.toffset = 0;
-        this.description = "";
-        this.aux_file = "";
-        this.intent_name = "";
-        this.qform_code = 0;
-        this.sform_code = 0;
-        this.quatern_b = 0;
-        this.quatern_c = 0;
-        this.quatern_d = 0;
-        this.qoffset_x = 0;
-        this.qoffset_y = 0;
-        this.qoffset_z = 0;
-        this.affine = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
-        this.magic = 0;
-        this.extensionFlag = [0, 0, 0, 0];
-    };
+    this.littleEndian = false;
+    this.dim_info = 0;
+    this.dims = [];
+    this.intent_p1 = 0;
+    this.intent_p2 = 0;
+    this.intent_p3 = 0;
+    this.intent_code = 0;
+    this.datatypeCode = 0;
+    this.numBitsPerVoxel = 0;
+    this.slice_start = 0;
+    this.slice_end = 0;
+    this.slice_code = 0;
+    this.pixDims = [];
+    this.vox_offset = 0;
+    this.scl_slope = 1;
+    this.scl_inter = 0;
+    this.xyzt_units = 0;
+    this.cal_max = 0;
+    this.cal_min = 0;
+    this.slice_duration = 0;
+    this.toffset = 0;
+    this.description = "";
+    this.aux_file = "";
+    this.intent_name = "";
+    this.qform_code = 0;
+    this.sform_code = 0;
+    this.quatern_b = 0;
+    this.quatern_c = 0;
+    this.quatern_d = 0;
+    this.qoffset_x = 0;
+    this.qoffset_y = 0;
+    this.qoffset_z = 0;
+    this.affine = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
+    this.magic = 0;
+    this.extensionFlag = [0, 0, 0, 0];
+};
 
 
 
@@ -62,6 +103,10 @@ nifti.NIFTI2.MAGIC_NUMBER = [0x6E, 0x2B, 0x32, 0, 0x0D, 0x0A, 0x1A, 0x0A];  // n
 
 /*** Prototype Methods ***/
 
+/**
+ * Reads the header data.
+ * @param {ArrayBuffer} data
+ */
 nifti.NIFTI2.prototype.readHeader = function (data) {
     var rawData = new DataView(data),
         magicCookieVal = nifti.Utils.getIntAt(rawData, 0, this.littleEndian),
@@ -159,13 +204,10 @@ nifti.NIFTI2.prototype.readHeader = function (data) {
 
 
 
-nifti.NIFTI2.prototype.getQformMat = function () {
-    return nifti.convertNiftiQFormToNiftiSForm(this.quatern_b, this.quatern_c, this.quatern_d, this.qoffset_x,
-        this.qoffset_y, this.qoffset_z, this.pixDims[1], this.pixDims[2], this.pixDims[3], this.pixDims[0]);
-};
-
-
-
+/**
+ * Returns a formatted string of header fields.
+ * @returns {string}
+ */
 nifti.NIFTI2.prototype.toFormattedString = function () {
     var fmt = nifti.Utils.formatNumber,
         string = "";
@@ -248,21 +290,111 @@ nifti.NIFTI2.prototype.toFormattedString = function () {
 
 
 
+/**
+ * Returns the byte index of the extension.
+ * @returns {number}
+ */
 nifti.NIFTI2.prototype.getExtensionLocation = function() {
     return nifti.NIFTI2.MAGIC_COOKIE + 4;
 };
 
 
 
+/**
+ * Returns the extension size.
+ * @param {DataView} data
+ * @returns {number}
+ */
 nifti.NIFTI2.prototype.getExtensionSize = nifti.NIFTI1.prototype.getExtensionSize;
+
+
+
+/**
+ * Returns the extension code.
+ * @param {DataView} data
+ * @returns {number}
+ */
 nifti.NIFTI2.prototype.getExtensionCode = nifti.NIFTI1.prototype.getExtensionCode;
+
+
+
+/**
+ * Returns a human-readable string of datatype.
+ * @param {number} code
+ * @returns {string}
+ */
 nifti.NIFTI2.prototype.getDatatypeCodeString = nifti.NIFTI1.prototype.getDatatypeCodeString;
+
+
+
+/**
+ * Returns a human-readable string of transform type.
+ * @param {number} code
+ * @returns {string}
+ */
 nifti.NIFTI2.prototype.getTransformCodeString = nifti.NIFTI1.prototype.getTransformCodeString;
+
+
+
+/**
+ * Returns a human-readable string of spatial and temporal units.
+ * @param {number} code
+ * @returns {string}
+ */
 nifti.NIFTI2.prototype.getUnitsCodeString = nifti.NIFTI1.prototype.getUnitsCodeString;
+
+
+
+/**
+ * Returns the qform matrix.
+ * @returns {Array.<Array.<number>>}
+ */
 nifti.NIFTI2.prototype.getQformMat = nifti.NIFTI1.prototype.getQformMat;
+
+
+
+/**
+ * Converts qform to an affine.  (See http://nifti.nimh.nih.gov/pub/dist/src/niftilib/nifti1_io.c)
+ * @param {number} qb
+ * @param {number} qc
+ * @param {number} qd
+ * @param {number} qx
+ * @param {number} qy
+ * @param {number} qz
+ * @param {number} dx
+ * @param {number} dy
+ * @param {number} dz
+ * @param {number} qfac
+ * @returns {Array.<Array.<number>>}
+ */
 nifti.NIFTI2.prototype.convertNiftiQFormToNiftiSForm = nifti.NIFTI1.prototype.convertNiftiQFormToNiftiSForm;
+
+
+
+/**
+ * Converts sform to an orientation string (e.g., XYZ+--).  (See http://nifti.nimh.nih.gov/pub/dist/src/niftilib/nifti1_io.c)
+ * @param {Array.<Array.<number>>} R
+ * @returns {string}
+ */
 nifti.NIFTI2.prototype.convertNiftiSFormToNEMA = nifti.NIFTI1.prototype.convertNiftiSFormToNEMA;
+
+
+
+/**
+ * Multiplies two 3x3 matrices.  (See http://nifti.nimh.nih.gov/pub/dist/src/niftilib/nifti1_io.c)
+ * @param {Array.<Array.<number>>} A
+ * @param {Array.<Array.<number>>} B
+ * @returns {Array.<Array.<number>>}
+ */
 nifti.NIFTI2.prototype.nifti_mat33_mul = nifti.NIFTI1.prototype.nifti_mat33_mul;
+
+
+
+/**
+ * Returns the determinant of a 3x3 matrix.  (See http://nifti.nimh.nih.gov/pub/dist/src/niftilib/nifti1_io.c)
+ * @param {Array.<Array.<number>>} R
+ * @returns {number}
+ */
 nifti.NIFTI2.prototype.nifti_mat33_determ = nifti.NIFTI1.prototype.nifti_mat33_determ;
 
 

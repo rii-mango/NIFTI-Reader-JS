@@ -6,6 +6,10 @@
 
 /*** Imports ***/
 
+/**
+ * nifti
+ * @type {*|{}}
+ */
 var nifti = nifti || {};
 nifti.NIFTI1 = nifti.NIFTI1 || ((typeof require !== 'undefined') ? require('./nifti1.js') : null);
 nifti.NIFTI2 = nifti.NIFTI2 || ((typeof require !== 'undefined') ? require('./nifti2.js') : null);
@@ -17,6 +21,11 @@ var pako = pako || ((typeof require !== 'undefined') ? require('pako') : null);
 
 /*** Static Methods ***/
 
+/**
+ * Returns true if this data represents a NIFTI-1 header.
+ * @param {ArrayBuffer} data
+ * @returns {boolean}
+ */
 nifti.isNIFTI1 = function (data) {
     var buf, mag1, mag2, mag3;
 
@@ -30,7 +39,11 @@ nifti.isNIFTI1 = function (data) {
 };
 
 
-
+/**
+ * Returns true if this data represents a NIFTI-2 header.
+ * @param {ArrayBuffer} data
+ * @returns {boolean}
+ */
 nifti.isNIFTI2 = function (data) {
     var buf, mag1, mag2, mag3;
 
@@ -45,12 +58,22 @@ nifti.isNIFTI2 = function (data) {
 
 
 
+/**
+ * Returns true if this data represents a NIFTI header.
+ * @param {ArrayBuffer} data
+ * @returns {boolean}
+ */
 nifti.isNIFTI = function (data) {
     return (nifti.isNIFTI1(data) || nifti.isNIFTI2(data));
 };
 
 
 
+/**
+ * Returns true if this data is GZIP compressed.
+ * @param {ArrayBuffer} data
+ * @returns {boolean}
+ */
 nifti.isCompressed = function (data) {
     var buf, magicCookie1, magicCookie2;
 
@@ -74,12 +97,22 @@ nifti.isCompressed = function (data) {
 
 
 
+/**
+ * Returns decompressed data.
+ * @param {ArrayBuffer} data
+ * @returns {ArrayBuffer}
+ */
 nifti.decompress = function (data) {
     return pako.inflate(data).buffer;
 };
 
 
 
+/**
+ * Reads and returns the header object.
+ * @param {ArrayBuffer} data
+ * @returns {nifti.NIFTI1|nifti.NIFTI2|null}
+ */
 nifti.readHeader = function (data) {
     var header = null;
 
@@ -104,12 +137,23 @@ nifti.readHeader = function (data) {
 
 
 
+/**
+ * Returns true if this header contains an extension.
+ * @param {nifti.NIFTI1|nifti.NIFTI2} header
+ * @returns {boolean}
+ */
 nifti.hasExtension = function (header) {
     return (header.extensionFlag[0] != 0);
 };
 
 
 
+/**
+ * Returns the image data.
+ * @param {nifti.NIFTI1|nifti.NIFTI2} header
+ * @param {ArrayBuffer} data
+ * @returns {ArrayBuffer}
+ */
 nifti.readImage = function (header, data) {
     var imageOffset = header.vox_offset;
     var imageSize = header.dims[1] * header.dims[2] * header.dims[3] * header.dims[4] * (header.numBitsPerVoxel / 8);
@@ -118,6 +162,12 @@ nifti.readImage = function (header, data) {
 
 
 
+/**
+ * Returns the extension data (including extension header).
+ * @param {nifti.NIFTI1|nifti.NIFTI2} header
+ * @param {ArrayBuffer} data
+ * @returns {ArrayBuffer}
+ */
 nifti.readExtension = function (header, data) {
     var loc = header.getExtensionLocation(),
         size = header.extensionSize;
@@ -127,6 +177,12 @@ nifti.readExtension = function (header, data) {
 
 
 
+/**
+ * Returns the extension data.
+ * @param {nifti.NIFTI1|nifti.NIFTI2} header
+ * @param {ArrayBuffer} data
+ * @returns {ArrayBuffer}
+ */
 nifti.readExtensionData = function (header, data) {
     var loc = header.getExtensionLocation(),
         size = header.extensionSize;

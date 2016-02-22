@@ -10,7 +10,52 @@ var nifti = nifti || {};
 nifti.Utils = nifti.Utils || ((typeof require !== 'undefined') ? require('./utilities.js') : null);
 
 
+
 /*** Constructor ***/
+
+/**
+ * The NIFTI1 constructor.
+ * @constructor
+ * @property {boolean} littleEndian
+ * @property {number} dim_info
+ * @property {number[]} dims - image dimensions
+ * @property {number} intent_p1
+ * @property {number} intent_p2
+ * @property {number} intent_p3
+ * @property {number} intent_code
+ * @property {number} datatypeCode
+ * @property {number} numBitsPerVoxel
+ * @property {number} slice_start
+ * @property {number} slice_end
+ * @property {number} slice_code
+ * @property {number[]} pixDims - voxel dimensions
+ * @property {number} vox_offset
+ * @property {number} scl_slope
+ * @property {number} scl_inter
+ * @property {number} xyzt_units
+ * @property {number} cal_max
+ * @property {number} cal_min
+ * @property {number} slice_duration
+ * @property {number} toffset
+ * @property {string} description
+ * @property {string} aux_file
+ * @property {string} intent_name
+ * @property {number} qform_code
+ * @property {number} sform_code
+ * @property {number} quatern_b
+ * @property {number} quatern_c
+ * @property {number} quatern_d
+ * @property {number} quatern_x
+ * @property {number} quatern_y
+ * @property {number} quatern_z
+ * @property {Array.<Array.<number>>} affine
+ * @property {string} magic
+ * @property {boolean} isHDR - if hdr/img format
+ * @property {number[]} extensionFlag
+ * @property {number} extensionSize
+ * @property {number} extensionCode
+ * @type {Function}
+ */
 nifti.NIFTI1 = nifti.NIFTI1 || function () {
     this.littleEndian = false;
     this.dim_info = 0;
@@ -106,6 +151,10 @@ nifti.NIFTI1.EXTENSION_HEADER_SIZE = 8;
 
 /*** Prototype Methods ***/
 
+/**
+ * Reads the header data.
+ * @param {ArrayBuffer} data
+ */
 nifti.NIFTI1.prototype.readHeader = function (data) {
     var rawData = new DataView(data),
         magicCookieVal = nifti.Utils.getIntAt(rawData, 0, this.littleEndian),
@@ -205,7 +254,10 @@ nifti.NIFTI1.prototype.readHeader = function (data) {
 };
 
 
-
+/**
+ * Returns a formatted string of header fields.
+ * @returns {string}
+ */
 nifti.NIFTI1.prototype.toFormattedString = function () {
     var fmt = nifti.Utils.formatNumber,
         string = "";
@@ -292,7 +344,11 @@ nifti.NIFTI1.prototype.toFormattedString = function () {
 };
 
 
-
+/**
+ * Returns a human-readable string of datatype.
+ * @param {number} code
+ * @returns {string}
+ */
 nifti.NIFTI1.prototype.getDatatypeCodeString = function (code) {
     if (code === nifti.NIFTI1.TYPE_UINT8) {
         return "1-Byte Unsigned Integer";
@@ -322,7 +378,11 @@ nifti.NIFTI1.prototype.getDatatypeCodeString = function (code) {
 };
 
 
-
+/**
+ * Returns a human-readable string of transform type.
+ * @param {number} code
+ * @returns {string}
+ */
 nifti.NIFTI1.prototype.getTransformCodeString = function (code) {
     if (code === nifti.NIFTI1.XFORM_SCANNER_ANAT) {
         return "Scanner";
@@ -338,7 +398,11 @@ nifti.NIFTI1.prototype.getTransformCodeString = function (code) {
 };
 
 
-
+/**
+ * Returns a human-readable string of spatial and temporal units.
+ * @param {number} code
+ * @returns {string}
+ */
 nifti.NIFTI1.prototype.getUnitsCodeString = function (code) {
     if (code === nifti.NIFTI1.UNITS_METER) {
         return "Meters";
@@ -364,7 +428,10 @@ nifti.NIFTI1.prototype.getUnitsCodeString = function (code) {
 };
 
 
-
+/**
+ * Returns the qform matrix.
+ * @returns {Array.<Array.<number>>}
+ */
 nifti.NIFTI1.prototype.getQformMat = function () {
     return this.convertNiftiQFormToNiftiSForm(this.quatern_b, this.quatern_c, this.quatern_d, this.qoffset_x,
         this.qoffset_y, this.qoffset_z, this.pixDims[1], this.pixDims[2], this.pixDims[3], this.pixDims[0]);
@@ -372,7 +439,20 @@ nifti.NIFTI1.prototype.getQformMat = function () {
 
 
 
-// http://nifti.nimh.nih.gov/pub/dist/src/niftilib/nifti1_io.c
+/**
+ * Converts qform to an affine.  (See http://nifti.nimh.nih.gov/pub/dist/src/niftilib/nifti1_io.c)
+ * @param {number} qb
+ * @param {number} qc
+ * @param {number} qd
+ * @param {number} qx
+ * @param {number} qy
+ * @param {number} qz
+ * @param {number} dx
+ * @param {number} dy
+ * @param {number} dz
+ * @param {number} qfac
+ * @returns {Array.<Array.<number>>}
+ */
 nifti.NIFTI1.prototype.convertNiftiQFormToNiftiSForm = function (qb, qc, qd, qx, qy, qz, dx, dy, dz,
                                                 qfac) {
     var R = [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]],
@@ -431,7 +511,11 @@ nifti.NIFTI1.prototype.convertNiftiQFormToNiftiSForm = function (qb, qc, qd, qx,
 
 
 
-// http://nifti.nimh.nih.gov/pub/dist/src/niftilib/nifti1_io.c
+/**
+ * Converts sform to an orientation string (e.g., XYZ+--).  (See http://nifti.nimh.nih.gov/pub/dist/src/niftilib/nifti1_io.c)
+ * @param {Array.<Array.<number>>} R
+ * @returns {string}
+ */
 nifti.NIFTI1.prototype.convertNiftiSFormToNEMA = function (R) {
     var xi, xj, xk, yi, yj, yk, zi, zj, zk, val, detQ, detP, i, j, k, p, q, r, ibest, jbest, kbest, pbest, qbest, rbest,
         M, vbest, Q, P, iChar, jChar, kChar, iSense, jSense, kSense;
@@ -709,7 +793,12 @@ nifti.NIFTI1.prototype.convertNiftiSFormToNEMA = function (R) {
 
 
 
-// http://nifti.nimh.nih.gov/pub/dist/src/niftilib/nifti1_io.c
+/**
+ * Multiplies two 3x3 matrices.  (See http://nifti.nimh.nih.gov/pub/dist/src/niftilib/nifti1_io.c)
+ * @param {Array.<Array.<number>>} A
+ * @param {Array.<Array.<number>>} B
+ * @returns {Array.<Array.<number>>}
+ */
 nifti.NIFTI1.prototype.nifti_mat33_mul = function (A, B) {
     var C = [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
         i,
@@ -726,7 +815,11 @@ nifti.NIFTI1.prototype.nifti_mat33_mul = function (A, B) {
 
 
 
-// http://nifti.nimh.nih.gov/pub/dist/src/niftilib/nifti1_io.c
+/**
+ * Returns the determinant of a 3x3 matrix.  (See http://nifti.nimh.nih.gov/pub/dist/src/niftilib/nifti1_io.c)
+ * @param {Array.<Array.<number>>} R
+ * @returns {number}
+ */
 nifti.NIFTI1.prototype.nifti_mat33_determ = function (R) {
     var r11, r12, r13, r21, r22, r23, r31, r32, r33;
     /*  INPUT MATRIX:  */
@@ -744,19 +837,31 @@ nifti.NIFTI1.prototype.nifti_mat33_determ = function (R) {
 };
 
 
-
+/**
+ * Returns the byte index of the extension.
+ * @returns {number}
+ */
 nifti.NIFTI1.prototype.getExtensionLocation = function() {
     return nifti.NIFTI1.MAGIC_COOKIE + 4;
 };
 
 
-
+/**
+ * Returns the extension size.
+ * @param {DataView} data
+ * @returns {number}
+ */
 nifti.NIFTI1.prototype.getExtensionSize = function(data) {
     return nifti.Utils.getIntAt(data, this.getExtensionLocation(), this.littleEndian);
 };
 
 
 
+/**
+ * Returns the extension code.
+ * @param {DataView} data
+ * @returns {number}
+ */
 nifti.NIFTI1.prototype.getExtensionCode = function(data) {
     return nifti.Utils.getIntAt(data, this.getExtensionLocation() + 4, this.littleEndian);
 };
