@@ -155,8 +155,19 @@ nifti.hasExtension = function (header) {
  * @returns {ArrayBuffer}
  */
 nifti.readImage = function (header, data) {
-    var imageOffset = header.vox_offset;
-    var imageSize = header.dims[1] * header.dims[2] * header.dims[3] * header.dims[4] * (header.numBitsPerVoxel / 8);
+    var imageOffset = header.vox_offset,
+        timeDim = 1,
+        statDim = 1;
+
+    if (header.dims[4]) {
+        timeDim = header.dims[4];
+    }
+
+    if (header.dims[5]) {
+        statDim = header.dims[5];
+    }
+
+    var imageSize = header.dims[1] * header.dims[2] * header.dims[3] * timeDim * statDim * (header.numBitsPerVoxel / 8);
     return data.slice(imageOffset, imageOffset + imageSize);
 };
 
