@@ -6587,8 +6587,19 @@ nifti.hasExtension = function (header) {
  * @returns {ArrayBuffer}
  */
 nifti.readImage = function (header, data) {
-    var imageOffset = header.vox_offset;
-    var imageSize = header.dims[1] * header.dims[2] * header.dims[3] * header.dims[4] * (header.numBitsPerVoxel / 8);
+    var imageOffset = header.vox_offset,
+        timeDim = 1,
+        statDim = 1;
+
+    if (header.dims[4]) {
+        timeDim = header.dims[4];
+    }
+
+    if (header.dims[5]) {
+        statDim = header.dims[5];
+    }
+
+    var imageSize = header.dims[1] * header.dims[2] * header.dims[3] * timeDim * statDim * (header.numBitsPerVoxel / 8);
     return data.slice(imageOffset, imageOffset + imageSize);
 };
 
@@ -7426,12 +7437,6 @@ nifti.NIFTI1.prototype.convertNiftiSFormToNEMA = function (R) {
 
 
 
-/**
- * Multiplies two 3x3 matrices.  (See http://nifti.nimh.nih.gov/pub/dist/src/niftilib/nifti1_io.c)
- * @param {Array.<Array.<number>>} A
- * @param {Array.<Array.<number>>} B
- * @returns {Array.<Array.<number>>}
- */
 nifti.NIFTI1.prototype.nifti_mat33_mul = function (A, B) {
     var C = [[0, 0, 0], [0, 0, 0], [0, 0, 0]],
         i,
@@ -7448,11 +7453,6 @@ nifti.NIFTI1.prototype.nifti_mat33_mul = function (A, B) {
 
 
 
-/**
- * Returns the determinant of a 3x3 matrix.  (See http://nifti.nimh.nih.gov/pub/dist/src/niftilib/nifti1_io.c)
- * @param {Array.<Array.<number>>} R
- * @returns {number}
- */
 nifti.NIFTI1.prototype.nifti_mat33_determ = function (R) {
     var r11, r12, r13, r21, r22, r23, r31, r32, r33;
     /*  INPUT MATRIX:  */
@@ -7891,21 +7891,10 @@ nifti.NIFTI2.prototype.convertNiftiSFormToNEMA = nifti.NIFTI1.prototype.convertN
 
 
 
-/**
- * Multiplies two 3x3 matrices.  (See http://nifti.nimh.nih.gov/pub/dist/src/niftilib/nifti1_io.c)
- * @param {Array.<Array.<number>>} A
- * @param {Array.<Array.<number>>} B
- * @returns {Array.<Array.<number>>}
- */
 nifti.NIFTI2.prototype.nifti_mat33_mul = nifti.NIFTI1.prototype.nifti_mat33_mul;
 
 
 
-/**
- * Returns the determinant of a 3x3 matrix.  (See http://nifti.nimh.nih.gov/pub/dist/src/niftilib/nifti1_io.c)
- * @param {Array.<Array.<number>>} R
- * @returns {number}
- */
 nifti.NIFTI2.prototype.nifti_mat33_determ = nifti.NIFTI1.prototype.nifti_mat33_determ;
 
 
