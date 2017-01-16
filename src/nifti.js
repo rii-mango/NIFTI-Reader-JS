@@ -29,7 +29,14 @@ var pako = pako || ((typeof require !== 'undefined') ? require('pako') : null);
 nifti.isNIFTI1 = function (data) {
     var buf, mag1, mag2, mag3;
 
+    if (data.byteLength < nifti.NIFTI1.STANDARD_HEADER_SIZE) {
+        return false;
+    }
+
     buf = new DataView(data);
+
+    if (buf)
+
     mag1 = buf.getUint8(nifti.NIFTI1.MAGIC_NUMBER_LOCATION);
     mag2 = buf.getUint8(nifti.NIFTI1.MAGIC_NUMBER_LOCATION + 1);
     mag3 = buf.getUint8(nifti.NIFTI1.MAGIC_NUMBER_LOCATION + 2);
@@ -46,6 +53,10 @@ nifti.isNIFTI1 = function (data) {
  */
 nifti.isNIFTI2 = function (data) {
     var buf, mag1, mag2, mag3;
+
+    if (data.byteLength < nifti.NIFTI1.STANDARD_HEADER_SIZE) {
+        return false;
+    }
 
     buf = new DataView(data);
     mag1 = buf.getUint8(nifti.NIFTI2.MAGIC_NUMBER_LOCATION);

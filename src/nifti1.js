@@ -143,6 +143,7 @@ nifti.NIFTI1.UNITS_RADS          = 48;
 
 // nifti1 codes
 nifti.NIFTI1.MAGIC_COOKIE = 348;
+nifti.NIFTI1.STANDARD_HEADER_SIZE = 348;
 nifti.NIFTI1.MAGIC_NUMBER_LOCATION = 344;
 nifti.NIFTI1.MAGIC_NUMBER = [0x6E, 0x2B, 0x31];  // n+1 (.nii)
 nifti.NIFTI1.MAGIC_NUMBER2 = [0x6E, 0x69, 0x31];  // ni1 (.hdr/.img)
