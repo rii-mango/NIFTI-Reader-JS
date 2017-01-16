@@ -6461,7 +6461,14 @@ var pako = pako || ((typeof require !== 'undefined') ? require('pako') : null);
 nifti.isNIFTI1 = function (data) {
     var buf, mag1, mag2, mag3;
 
+    if (data.byteLength < nifti.NIFTI1.STANDARD_HEADER_SIZE) {
+        return false;
+    }
+
     buf = new DataView(data);
+
+    if (buf)
+
     mag1 = buf.getUint8(nifti.NIFTI1.MAGIC_NUMBER_LOCATION);
     mag2 = buf.getUint8(nifti.NIFTI1.MAGIC_NUMBER_LOCATION + 1);
     mag3 = buf.getUint8(nifti.NIFTI1.MAGIC_NUMBER_LOCATION + 2);
@@ -6478,6 +6485,10 @@ nifti.isNIFTI1 = function (data) {
  */
 nifti.isNIFTI2 = function (data) {
     var buf, mag1, mag2, mag3;
+
+    if (data.byteLength < nifti.NIFTI1.STANDARD_HEADER_SIZE) {
+        return false;
+    }
 
     buf = new DataView(data);
     mag1 = buf.getUint8(nifti.NIFTI2.MAGIC_NUMBER_LOCATION);
@@ -6787,6 +6798,7 @@ nifti.NIFTI1.UNITS_RADS          = 48;
 
 // nifti1 codes
 nifti.NIFTI1.MAGIC_COOKIE = 348;
+nifti.NIFTI1.STANDARD_HEADER_SIZE = 348;
 nifti.NIFTI1.MAGIC_NUMBER_LOCATION = 344;
 nifti.NIFTI1.MAGIC_NUMBER = [0x6E, 0x2B, 0x31];  // n+1 (.nii)
 nifti.NIFTI1.MAGIC_NUMBER2 = [0x6E, 0x69, 0x31];  // ni1 (.hdr/.img)
