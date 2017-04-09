@@ -1,7 +1,7 @@
 # NIFTI-Reader-JS
 A JavaScript [NIfTI](http://nifti.nimh.nih.gov/) file format reader.  This reader supports both NIfTI-1 and NIfT1-2 file formats, both compressed (.nii.gz) and uncompressed (.nii).
 
-###Usage
+### Usage
 [API](https://github.com/rii-mango/NIFTI-Reader-JS/wiki/API) and  [more examples](https://github.com/rii-mango/NIFTI-Reader-JS/tree/master/tests)
 
 ```javascript
@@ -25,7 +25,7 @@ if (nifti.isNIFTI(data)) {
 }
 ```
 
-###Install
+### Install
 Get a packaged source file:
 
 * [nifti-reader.js](https://raw.githubusercontent.com/rii-mango/NIFTI-Reader-JS/master/release/current/nifti-reader.js)
@@ -43,12 +43,12 @@ Or install via [Bower](http://bower.io/):
 bower install nifti-reader-js
 ```
 
-###Testing
+### Testing
 ```
 npm test
 ```
 
-###Building
+### Building
 See the [release folder](https://github.com/rii-mango/NIFTI-Reader-JS/tree/master/release) for the latest builds or build it yourself using:
 ```
 npm run build
