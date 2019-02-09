@@ -84,6 +84,7 @@
                     var offset = sliceOffset + rowOffset + col;
                     var value = typedData[offset];
 
+                    // assumes data is 8-bit, otherwise you would need to first convert to 0-255 range
                     canvasImageData.data[(rowOffset + col) * 4] = value & 0xFF;
                     canvasImageData.data[(rowOffset + col) * 4 + 1] = value & 0xFF;
                     canvasImageData.data[(rowOffset + col) * 4 + 2] = value & 0xFF;
