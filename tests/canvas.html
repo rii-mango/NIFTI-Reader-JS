@@ -97,6 +97,7 @@
                            info for how to orient data
                          - assumes voxel shape (pixDims) is isometric, if not, you'll need 
                            to apply transform to the canvas
+                         - byte order: see littleEndian flag
                     */
                     canvasImageData.data[(rowOffset + col) * 4] = value & 0xFF;
                     canvasImageData.data[(rowOffset + col) * 4 + 1] = value & 0xFF;
