@@ -85,10 +85,18 @@
                     var value = typedData[offset];
 
                     /* 
-                       assumes data is 8-bit, otherwise you would need to first convert 
+                       Assumes data is 8-bit, otherwise you would need to first convert 
                        to 0-255 range based on data min and max (or display range) -- see
                        cal_min/max in nifti header or first iterate through data to find 
                        range.
+                       
+                       Other things to take into consideration:
+                         - data scale: scl_slope and scl_inter, apply to raw value before 
+                           converting to 8-bit range
+                         - orientation: displays in raw orientation, see nifti orientation 
+                           info for how to orient data
+                         - assumes voxel shape (pixDims) is isometric, if not, you'll need 
+                           to apply transform to the canvas
                     */
                     canvasImageData.data[(rowOffset + col) * 4] = value & 0xFF;
                     canvasImageData.data[(rowOffset + col) * 4 + 1] = value & 0xFF;
