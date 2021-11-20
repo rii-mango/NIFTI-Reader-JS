@@ -856,7 +856,90 @@ nifti.NIFTI1.prototype.getExtensionCode = function(data) {
     return nifti.Utils.getIntAt(data, this.getExtensionLocation() + 4, this.littleEndian);
 };
 
+/**
+ * Returns header as ArrayBuffer.
+ * @returns {ArrayBuffer}
+ */
+nifti.NIFTI1.prototype.toArrayBuffer = function() {
+    const SHORT_SIZE = 2;
+    const FLOAT32_SIZE = 4;
 
+    let byteArray = new Uint8Array(348);
+    let view = new DataView(byteArray.buffer);
+    // sizeof_hdr
+    view.setInt32(0, 348, this.littleEndian);
+    
+    // data_type, db_name, extents, session_error, regular are not used
+
+    // dim_info
+    view.setUint8(39, this.dim_info);
+
+    // dims
+    for(let i = 0; i < 8; i++) {
+        view.setUint16(40 + SHORT_SIZE * i, this.dims[i], this.littleEndian);
+    }
+
+    // intent_p1, intent_p2, intent_p3
+    view.setFloat32(56, this.intent_p1, this.littleEndian);
+    view.setFloat32(60, this.intent_p2, this.littleEndian);
+    view.setFloat32(64, this.intent_p3, this.littleEndian);
+    
+    // intent_code, datatype, bitpix, slice_start
+    view.setInt16(68, this.intent_code, this.littleEndian);
+    view.setInt16(70, this.datatypeCode, this.littleEndian);
+    view.setInt16(72, this.numBitsPerVoxel, this.littleEndian);
+    view.setInt16(74, this.slice_start, this.littleEndian);
+
+    // pixdim[8], vox_offset, scl_slope, scl_inter
+    for(let i = 0; i < 8; i++) {
+        view.setFloat32(76 + FLOAT32_SIZE * i,  this.pixDims[i], this.littleEndian);
+    }
+    view.setFloat32(108, this.vox_offset, this.littleEndian);
+    view.setFloat32(112, this.scl_slope, this.littleEndian);
+    view.setFloat32(116, this.scl_inter, this.littleEndian);
+
+    // slice_end
+    view.setInt16(120, this.slice_end, this.littleEndian);
+    
+    // slice_code, xyzt_units
+    view.setUint8(122, this.slice_code);
+    view.setUint8(123, this.xyzt_units);
+    
+    // cal_max, cal_min, slice_duration, toffset
+    view.setFloat32(124, this.cal_max, this.littleEndian);
+    view.setFloat32(128, this.cal_min, this.littleEndian);
+    view.setFloat32(132, this.slice_duration, this.littleEndian);
+    view.setFloat32(136, this.toffset, this.littleEndian);
+    
+    // glmax, glmin are unused
+    
+    // descrip and aux_file
+    byteArray.set(Buffer.from(this.description), 148);
+    byteArray.set(Buffer.from(this.aux_file), 228);
+
+    // qform_code, sform_code
+    view.setInt16(252, this.qform_code, this.littleEndian);
+    view.setInt16(254, this.sform_code, this.littleEndian);
+    
+    // quatern_b, quatern_c, quatern_d, qoffset_x, qoffset_y, qoffset_z, srow_x[4], srow_y[4], and srow_z[4]
+    view.setFloat32(256, this.quatern_b, this.littleEndian);
+    view.setFloat32(260, this.quatern_c, this.littleEndian);
+    view.setFloat32(264, this.quatern_d, this.littleEndian);
+    view.setFloat32(268, this.qoffset_x, this.littleEndian);
+    view.setFloat32(272, this.qoffset_y, this.littleEndian);
+    view.setFloat32(276, this.qoffset_z, this.littleEndian);
+    const flattened = this.affine.flat();
+    // we only want the first three rows
+    for(let i = 0; i < 12; i++) {
+        view.setFloat32(280 + FLOAT32_SIZE * i, flattened[i]);
+    }
+    
+    // intent_name and magic
+    byteArray.set(Buffer.from(this.intent_name), 328);
+    byteArray.set(Buffer.from(this.magic), 344);
+
+    return byteArray.buffer;
+};
 
 /*** Exports ***/
 

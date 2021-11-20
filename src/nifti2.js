@@ -124,7 +124,7 @@ nifti.NIFTI2.prototype.readHeader = function (data) {
     if (magicCookieVal !== nifti.NIFTI2.MAGIC_COOKIE) {
         throw new Error("This does not appear to be a NIFTI file!");
     }
-
+    this.magic = nifti.Utils.getStringAt(rawData, 4, 12);
     this.datatypeCode = nifti.Utils.getShortAt(rawData, 12, this.littleEndian);
     this.numBitsPerVoxel = nifti.Utils.getShortAt(rawData, 14, this.littleEndian);
 
@@ -386,7 +386,124 @@ nifti.NIFTI2.prototype.nifti_mat33_mul = nifti.NIFTI1.prototype.nifti_mat33_mul;
 
 nifti.NIFTI2.prototype.nifti_mat33_determ = nifti.NIFTI1.prototype.nifti_mat33_determ;
 
+/**
+ * Returns header as ArrayBuffer.
+ * @returns {ArrayBuffer}
+ */
+ nifti.NIFTI2.prototype.toArrayBuffer = function() {
+    const INT64_SIZE = 8;
+    const DOUBLE_SIZE = 8;
 
+    let byteArray = new Uint8Array(540);
+    let view = new DataView(byteArray.buffer);
+    // sizeof_hdr
+    view.setInt32(0, 540, this.littleEndian);
+    
+    // magic
+    byteArray.set(Buffer.from(this.magic), 4);
+
+    // datatype
+    view.setInt16(12, this.datatypeCode, this.littleEndian);
+
+    // bitpix
+    view.setInt16(14, this.numBitsPerVoxel, this.littleEndian);
+
+    // dim[8]
+    for(let i = 0; i < 8; i++) {
+        view.setBigInt64(16 + INT64_SIZE * i, BigInt(this.dims[i]), this.littleEndian);
+    }
+
+    // intent_p1
+    view.setFloat64(80, this.intent_p1, this.littleEndian);
+
+    // intent_p2
+    view.setFloat64(88, this.intent_p2, this.littleEndian);
+
+    // intent_p3
+    view.setFloat64(96, this.intent_p3, this.littleEndian);
+
+    // pixdim
+    for(let i = 0; i < 8; i++) {
+        view.setFloat64(104 + DOUBLE_SIZE * i, this.pixDims[i], this.littleEndian);
+    }
+
+    // vox_offset
+    view.setBigInt64(168, BigInt(this.vox_offset), this.littleEndian);
+
+    // scl_slope
+    view.setFloat64(176, this.scl_slope, this.littleEndian);
+
+    // scl_inter
+    view.setFloat64(184, this.scl_inter, this.littleEndian);
+
+    // cal_max
+    view.setFloat64(192, this.cal_max, this.littleEndian);
+
+    // cal_min
+    view.setFloat64(200, this.cal_min, this.littleEndian);
+
+    // slice_duration
+    view.setFloat64(208, this.slice_duration, this.littleEndian);
+
+    // toffset
+    view.setFloat64(216, this.toffset, this.littleEndian);
+
+    // slice_start
+    view.setBigInt64(224, BigInt(this.slice_start), this.littleEndian);
+
+    // slice end
+    view.setBigInt64(232, BigInt(this.slice_end), this.littleEndian);
+
+    // descrip  
+    byteArray.set(Buffer.from(this.description), 240);
+    
+    // aux_file
+    byteArray.set(Buffer.from(this.aux_file), 320);
+
+    // qform_code
+    view.setInt32(344, this.qform_code, this.littleEndian);
+
+    // sform_code
+    view.setInt32(348, this.sform_code, this.littleEndian);
+
+    // quatern_b
+    view.setFloat64(352, this.quatern_b, this.littleEndian);
+
+    // quatern_c
+    view.setFloat64(360, this.quatern_c, this.littleEndian);
+   
+    // quatern_d
+    view.setFloat64(368, this.quatern_d, this.littleEndian);
+
+    // qoffset_x
+    view.setFloat64(376, this.qoffset_x, this.littleEndian);
+    
+    // qoffset_y
+    view.setFloat64(384, this.qoffset_y, this.littleEndian);
+
+    // qoffset_z
+    view.setFloat64(392, this.qoffset_z, this.littleEndian);
+    
+    // srow_x[4], srow_y[4], and srow_z[4]
+    const flattened = this.affine.flat();
+    // we only want the first three rows
+    for(let i = 0; i < 12; i++) {
+        view.setFloat64(400 + DOUBLE_SIZE * i, flattened[i], this.littleEndian);
+    }
+
+    // slice_code
+    view.setInt32(496, this.slice_code, this.littleEndian);
+    //  xyzt_units
+    view.setInt32(500, this.xyzt_units, this.littleEndian);
+    //  intent_code
+    view.setInt32(504, this.intent_code, this.littleEndian);
+    //  intent_name
+    byteArray.set(Buffer.from(this.intent_name), 508);
+    // dim_info
+    view.setUint8(524, this.dim_info);
+    console.log(byteArray.buffer);
+    return byteArray.buffer;
+ }
 
 /*** Exports ***/
 
