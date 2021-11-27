@@ -220,14 +220,113 @@ nifti.NIFTI1.prototype.readHeader = function (data) {
     this.quatern_b = nifti.Utils.getFloatAt(rawData, 256, this.littleEndian);
     this.quatern_c = nifti.Utils.getFloatAt(rawData, 260, this.littleEndian);
     this.quatern_d = nifti.Utils.getFloatAt(rawData, 264, this.littleEndian);
+    // Added by znshje on 27/11/2021
+    //
+    // quatern_a is a parameter in quaternion [a, b, c, d], which is required in affine calculation (METHOD 2)
+    // mentioned in the nifti1.h file
+    // It can be calculated by a = sqrt(1.0-(b*b+c*c+d*d))
+    this.quatern_a = Math.sqrt(1.0 -
+        (Math.pow(this.quatern_b, 2) + Math.pow(this.quatern_c, 2) + Math.pow(this.quatern_d, 2)))
+
     this.qoffset_x = nifti.Utils.getFloatAt(rawData, 268, this.littleEndian);
     this.qoffset_y = nifti.Utils.getFloatAt(rawData, 272, this.littleEndian);
     this.qoffset_z = nifti.Utils.getFloatAt(rawData, 276, this.littleEndian);
 
-    for (ctrOut = 0; ctrOut < 3; ctrOut += 1) {
-        for (ctrIn = 0; ctrIn < 4; ctrIn += 1) {
-            index = 280 + (((ctrOut * 4) + ctrIn) * 4);
-            this.affine[ctrOut][ctrIn] = nifti.Utils.getFloatAt(rawData, index, this.littleEndian);
+    // Added by znshje on 27/11/2021
+    //
+    /* See: https://nifti.nimh.nih.gov/pub/dist/src/niftilib/nifti1.h */
+    if (this.qform_code > 0) {
+        //   METHOD 2 (used when qform_code > 0, which should be the "normal" case):
+        //    ---------------------------------------------------------------------
+        //    The (x,y,z) coordinates are given by the pixdim[] scales, a rotation
+        //    matrix, and a shift.  This method is intended to represent
+        //    "scanner-anatomical" coordinates, which are often embedded in the
+        //    image header (e.g., DICOM fields (0020,0032), (0020,0037), (0028,0030),
+        //    and (0018,0050)), and represent the nominal orientation and location of
+        //    the data.  This method can also be used to represent "aligned"
+        //    coordinates, which would typically result from some post-acquisition
+        //    alignment of the volume to a standard orientation (e.g., the same
+        //    subject on another day, or a rigid rotation to true anatomical
+        //    orientation from the tilted position of the subject in the scanner).
+        //    The formula for (x,y,z) in terms of header parameters and (i,j,k) is:
+        //
+        //      [ x ]   [ R11 R12 R13 ] [        pixdim[1] * i ]   [ qoffset_x ]
+        //      [ y ] = [ R21 R22 R23 ] [        pixdim[2] * j ] + [ qoffset_y ]
+        //      [ z ]   [ R31 R32 R33 ] [ qfac * pixdim[3] * k ]   [ qoffset_z ]
+        //
+        //    The qoffset_* shifts are in the NIFTI-1 header.  Note that the center
+        //    of the (i,j,k)=(0,0,0) voxel (first value in the dataset array) is
+        //    just (x,y,z)=(qoffset_x,qoffset_y,qoffset_z).
+        //
+        //    The rotation matrix R is calculated from the quatern_* parameters.
+        //    This calculation is described below.
+        //
+        //    The scaling factor qfac is either 1 or -1.  The rotation matrix R
+        //    defined by the quaternion parameters is "proper" (has determinant 1).
+        //    This may not fit the needs of the data; for example, if the image
+        //    grid is
+        //      i increases from Left-to-Right
+        //      j increases from Anterior-to-Posterior
+        //      k increases from Inferior-to-Superior
+        //    Then (i,j,k) is a left-handed triple.  In this example, if qfac=1,
+        //    the R matrix would have to be
+        //
+        //      [  1   0   0 ]
+        //      [  0  -1   0 ]  which is "improper" (determinant = -1).
+        //      [  0   0   1 ]
+        //
+        //    If we set qfac=-1, then the R matrix would be
+        //
+        //      [  1   0   0 ]
+        //      [  0  -1   0 ]  which is proper.
+        //      [  0   0  -1 ]
+        //
+        //    This R matrix is represented by quaternion [a,b,c,d] = [0,1,0,0]
+        //    (which encodes a 180 degree rotation about the x-axis).
+
+        // Define a, b, c, d for coding covenience
+        const a = this.quatern_a
+        const b = this.quatern_b
+        const c = this.quatern_c
+        const d = this.quatern_d
+
+        this.qfac = this.pixDims[0] === 0 ? 1 : this.pixDims[0]
+
+        this.quatern_R = [
+            [a * a + b * b - c * c - d * d,  2 * b * c - 2 * a * d,          2 * b * d + 2 * a * c],
+            [2 * b * c + 2 * a * d,          a * a + c * c - b * b - d * d,  2 * c * d - 2 * a * b],
+            [2 * b * d - 2 * a * c,          2 * c * d + 2 * a * b,          a * a + d * d - c * c - b * b]
+        ]
+
+        for (ctrOut = 0; ctrOut < 3; ctrOut += 1) {
+            for (ctrIn = 0; ctrIn < 3; ctrIn += 1) {
+                this.affine[ctrOut][ctrIn] = this.quatern_R[ctrOut][ctrIn] * this.pixDims[ctrIn + 1];
+                if (ctrIn === 2) {
+                    this.affine[ctrOut][ctrIn] *= this.qfac;
+                }
+            }
+        }
+        // The last row of affine matrix is the offset vector
+        this.affine[0][3] = this.qoffset_x
+        this.affine[1][3] = this.qoffset_y
+        this.affine[2][3] = this.qoffset_z
+    } else if (this.sform_code > 0) {
+        //    METHOD 3 (used when sform_code > 0):
+        //    -----------------------------------
+        //    The (x,y,z) coordinates are given by a general affine transformation
+        //    of the (i,j,k) indexes:
+        //
+        //      x = srow_x[0] * i + srow_x[1] * j + srow_x[2] * k + srow_x[3]
+        //      y = srow_y[0] * i + srow_y[1] * j + srow_y[2] * k + srow_y[3]
+        //      z = srow_z[0] * i + srow_z[1] * j + srow_z[2] * k + srow_z[3]
+        //
+        //    The srow_* vectors are in the NIFTI_1 header.  Note that no use is
+        //    made of pixdim[] in this method.
+        for (ctrOut = 0; ctrOut < 3; ctrOut += 1) {
+            for (ctrIn = 0; ctrIn < 4; ctrIn += 1) {
+                index = 280 + (((ctrOut * 4) + ctrIn) * 4);
+                this.affine[ctrOut][ctrIn] = nifti.Utils.getFloatAt(rawData, index, this.littleEndian);
+            }
         }
     }
 
