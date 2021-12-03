@@ -12,6 +12,8 @@ var nifti = require('../src/nifti.js');
 var buf = fs.readFileSync('./tests/data/avg152T1_LR_nifti2.nii.gz');
 var data = nifti.Utils.toArrayBuffer(buf);
 var nifti2 = null;
+var bytes = null;
+var clone = null;
 
 describe('NIFTI-Reader-JS', function () {
     describe('compressed nifti-2 test', function () {
@@ -58,5 +60,12 @@ describe('NIFTI-Reader-JS', function () {
             var checksum = nifti.Utils.crc32(new DataView(imageData));
             assert.equal(checksum, 471047545);
         });
+
+        it('data returned from toArrayBuffer preserves all nifti-2 properties', function() {
+            bytes = nifti2.toArrayBuffer();
+            clone = nifti.readHeader(bytes);
+            assert.deepEqual(clone, nifti2);
+        });
+
     });
 });
