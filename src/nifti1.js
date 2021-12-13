@@ -4,12 +4,13 @@
 
 "use strict";
 
+const NIFTIEXTENSION = require('./nifti-extension.js');
+
 /*** Imports ***/
 
 var nifti = nifti || {};
 nifti.Utils = nifti.Utils || ((typeof require !== 'undefined') ? require('./utilities.js') : null);
-
-
+nifti.NIFTIEXTENSION = nifti.NIFTIEXTENSION || ((typeof require !== 'undefined') ? require('./nifti-extension.js') : null);
 
 /*** Constructor ***/
 
@@ -54,6 +55,7 @@ nifti.Utils = nifti.Utils || ((typeof require !== 'undefined') ? require('./util
  * @property {number[]} extensionFlag
  * @property {number} extensionSize
  * @property {number} extensionCode
+ * @property {nifti.NIFTIEXTENSION[]} extensions
  * @type {Function}
  */
 nifti.NIFTI1 = nifti.NIFTI1 || function () {
@@ -95,6 +97,7 @@ nifti.NIFTI1 = nifti.NIFTI1 || function () {
     this.extensionFlag = [0, 0, 0, 0];
     this.extensionSize = 0;
     this.extensionCode = 0;
+    this.extensions = [];
 };
 
 
@@ -345,10 +348,17 @@ nifti.NIFTI1.prototype.readHeader = function (data) {
         this.extensionFlag[1] = nifti.Utils.getByteAt(rawData, 348 + 1);
         this.extensionFlag[2] = nifti.Utils.getByteAt(rawData, 348 + 2);
         this.extensionFlag[3] = nifti.Utils.getByteAt(rawData, 348 + 3);
-
         if (this.extensionFlag[0]) {
-            this.extensionSize = this.getExtensionSize(rawData);
-            this.extensionCode = this.getExtensionCode(rawData);
+            // read our extensions
+            this.extensions = nifti.Utils.getExtensionsAt(rawData, 
+                this.getExtensionLocation(), 
+                this.littleEndian, 
+                this.vox_offset);
+
+            // set the extensionSize and extensionCode from the first extension found
+            this.extensionSize = this.extensions[0].esize;
+            this.extensionCode = this.extensions[0].ecode;
+            
         }
     }
 };
@@ -944,8 +954,6 @@ nifti.NIFTI1.prototype.getExtensionSize = function(data) {
     return nifti.Utils.getIntAt(data, this.getExtensionLocation(), this.littleEndian);
 };
 
-
-
 /**
  * Returns the extension code.
  * @param {DataView} data
@@ -956,14 +964,50 @@ nifti.NIFTI1.prototype.getExtensionCode = function(data) {
 };
 
 /**
+ * Adds an extension
+ * @param {NIFTIEXTENSION} extension
+ * @param {number} index 
+ */
+nifti.NIFTI1.prototype.addExtension = function(extension, index = -1) {    
+    if(index == -1) {
+        this.extensions.push(extension);    
+    }
+    else {
+        this.extensions.splice(index, 0, extension);
+    }
+    this.vox_offset += extension.esize;
+}
+
+/**
+ * Removes an extension
+ * @param {number} index
+ */
+ nifti.NIFTI1.prototype.removeExtension = function(index) {
+    
+    let extension = this.extensions[index];
+    if(extension) {
+        this.vox_offset -= extension.esize;
+    }
+    this.extensions.splice(index, 1);
+}
+
+/**
  * Returns header as ArrayBuffer.
+ * @param {boolean} includeExtensions - should extension bytes be included
  * @returns {ArrayBuffer}
  */
-nifti.NIFTI1.prototype.toArrayBuffer = function() {
+nifti.NIFTI1.prototype.toArrayBuffer = function(includeExtensions = false) {
     const SHORT_SIZE = 2;
     const FLOAT32_SIZE = 4;
+    let byteSize = 348 + 4; // + 4 for the extension bytes
 
-    let byteArray = new Uint8Array(348);
+    // calculate necessary size
+    if(includeExtensions) {
+        for(let extension of this.extensions) {
+            byteSize += extension.esize;
+        }
+    }
+    let byteArray = new Uint8Array(byteSize);
     let view = new DataView(byteArray.buffer);
     // sizeof_hdr
     view.setInt32(0, 348, this.littleEndian);
@@ -1036,6 +1080,22 @@ nifti.NIFTI1.prototype.toArrayBuffer = function() {
     // intent_name and magic
     byteArray.set(Buffer.from(this.intent_name), 328);
     byteArray.set(Buffer.from(this.magic), 344);
+
+    // add our extension data
+    if(includeExtensions) {
+        byteArray.set(Uint8Array.from([1, 0, 0, 0]), 348);
+        let extensionByteIndex = this.getExtensionLocation();
+        for(const extension of this.extensions) {
+            view.setInt32(extensionByteIndex, extension.esize, extension.littleEndian);
+            view.setInt32(extensionByteIndex + 4, extension.ecode, extension.littleEndian);
+            byteArray.set(new Uint8Array(extension.edata), extensionByteIndex + 8);
+            extensionByteIndex += extension.esize;
+        }
+    }
+    else {
+        // In a .nii file, these 4 bytes will always be present
+        byteArray.set(new Uint8Array(4).fill(0), 348);
+    }
 
     return byteArray.buffer;
 };

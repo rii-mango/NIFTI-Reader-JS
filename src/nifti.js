@@ -13,11 +13,10 @@
 var nifti = nifti || {};
 nifti.NIFTI1 = nifti.NIFTI1 || ((typeof require !== 'undefined') ? require('./nifti1.js') : null);
 nifti.NIFTI2 = nifti.NIFTI2 || ((typeof require !== 'undefined') ? require('./nifti2.js') : null);
+nifti.NIFTIEXTENSION = nifti.NIFTIEXTENSION || ((typeof require !== 'undefined') ? require('./nifti-extension.js') : null);
 nifti.Utils = nifti.Utils || ((typeof require !== 'undefined') ? require('./utilities.js') : null);
 
 var pako = pako || ((typeof require !== 'undefined') ? require('pako') : null);
-
-
 
 /*** Static Methods ***/
 
@@ -209,7 +208,7 @@ nifti.readExtensionData = function (header, data) {
     var loc = header.getExtensionLocation(),
         size = header.extensionSize;
 
-    return data.slice(loc + 8, loc + size - 8);
+    return data.slice(loc + 8, loc + size); // +8 for loc and -8 for esize and ecode
 };
 
 

@@ -9,7 +9,7 @@
 var nifti = nifti || {};
 nifti.Utils = nifti.Utils || ((typeof require !== 'undefined') ? require('./utilities.js') : null);
 nifti.NIFTI1 = nifti.NIFTI1 || ((typeof require !== 'undefined') ? require('./nifti1.js') : null);
-
+nifti.NIFTIEXTENSION = nifti.NIFTIEXTENSION || ((typeof require !== 'undefined') ? require('./nifti-extension.js') : null);
 
 /*** Constructor ***/
 
@@ -196,8 +196,15 @@ nifti.NIFTI2.prototype.readHeader = function (data) {
         this.extensionFlag[3] = nifti.Utils.getByteAt(rawData, 540 + 3);
 
         if (this.extensionFlag[0]) {
-            this.extensionSize = this.getExtensionSize(rawData);
-            this.extensionCode = this.getExtensionCode(rawData);
+            // read our extensions
+            this.extensions = nifti.Utils.getExtensionsAt(rawData, 
+                this.getExtensionLocation(), 
+                this.littleEndian, 
+                this.vox_offset);
+
+            // set the extensionSize and extensionCode from the first extension found
+            this.extensionSize = this.extensions[0].esize;
+            this.extensionCode = this.extensions[0].ecode;
         }
     }
 };
@@ -307,14 +314,25 @@ nifti.NIFTI2.prototype.getExtensionLocation = function() {
  */
 nifti.NIFTI2.prototype.getExtensionSize = nifti.NIFTI1.prototype.getExtensionSize;
 
-
-
 /**
  * Returns the extension code.
  * @param {DataView} data
  * @returns {number}
  */
 nifti.NIFTI2.prototype.getExtensionCode = nifti.NIFTI1.prototype.getExtensionCode;
+
+/**
+ * Adds an extension
+ * @param {NIFTIEXTENSION} extension
+ * @param {number} index 
+ */
+ nifti.NIFTI2.prototype.addExtension = nifti.NIFTI1.prototype.addExtension; 
+
+/**
+ * Removes an extension
+ * @param {number} index
+ */
+ nifti.NIFTI2.prototype.removeExtension = nifti.NIFTI1.prototype.removeExtension;
 
 
 
@@ -388,13 +406,22 @@ nifti.NIFTI2.prototype.nifti_mat33_determ = nifti.NIFTI1.prototype.nifti_mat33_d
 
 /**
  * Returns header as ArrayBuffer.
+ * @param {boolean} includeExtensions - should extension bytes be included
  * @returns {ArrayBuffer}
  */
- nifti.NIFTI2.prototype.toArrayBuffer = function() {
+ nifti.NIFTI2.prototype.toArrayBuffer = function(includeExtensions = false) {
     const INT64_SIZE = 8;
     const DOUBLE_SIZE = 8;
 
-    let byteArray = new Uint8Array(540);
+    let byteSize = 540;
+    // calculate necessary size
+    if(includeExtensions) {
+        for(let extension of this.extensions) {
+            byteSize += extension.esize;
+        }
+    }
+
+    let byteArray = new Uint8Array(byteSize);
     let view = new DataView(byteArray.buffer);
     // sizeof_hdr
     view.setInt32(0, 540, this.littleEndian);
@@ -501,7 +528,23 @@ nifti.NIFTI2.prototype.nifti_mat33_determ = nifti.NIFTI1.prototype.nifti_mat33_d
     byteArray.set(Buffer.from(this.intent_name), 508);
     // dim_info
     view.setUint8(524, this.dim_info);
-    console.log(byteArray.buffer);
+
+    // add our extension data
+    if(includeExtensions) {
+        byteArray.set(Uint8Array.from([1, 0, 0, 0]), 540);
+        let extensionByteIndex = this.getExtensionLocation();
+        for(const extension of this.extensions) {
+            view.setInt32(extensionByteIndex, extension.esize, extension.littleEndian);
+            view.setInt32(extensionByteIndex + 4, extension.ecode, extension.littleEndian);
+            byteArray.set(new Uint8Array(extension.edata), extensionByteIndex + 8);
+            extensionByteIndex += extension.esize;
+        }
+    }
+    else {
+        // In a .nii file, these 4 bytes will always be present
+        byteArray.set(new Uint8Array(4).fill(0), 540);
+    }
+
     return byteArray.buffer;
  }
 
