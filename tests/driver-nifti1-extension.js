@@ -48,7 +48,6 @@ describe('NIFTI-Reader-JS', function () {
 
         it('should have one extension that is 376 bytes', function() {
             extension = nifti1.extensions[0];
-            console.log(extension);
             assert.equal(EXPECTED_EXTENSION_LENGTH, extension.edata.byteLength);
             assert.equal(1, nifti1.extensions.length);
         });
@@ -83,26 +82,22 @@ describe('NIFTI-Reader-JS', function () {
         });
 
         it('toArrayBuffer properly preserves extension bytes', function() {
-            console.log(nifti1.extensions[0]);
             let bytes = nifti1.toArrayBuffer(true);
             let copy = nifti.readHeader(bytes);
             assert.equal(1, copy.extensions.length);
             assert.equal(EXPECTED_EXTENSION_LENGTH, copy.extensions[0].edata.byteLength);
-            console.log(copy.extensions[0]);
         });
 
         it('extensions can be added and serialized', function() {
-            let data = new Int32Array(6);
-            data.fill(8);
-            let newExtension = new nifti.NIFTIEXTENSION(32, 4, data.buffer, true);
-            console.log(newExtension);
+            let edata = new Int32Array(6);
+            edata.fill(8);
+            let newExtension = new nifti.NIFTIEXTENSION(32, 4, edata.buffer, true);
             nifti1.addExtension(newExtension);
             assert.equal(2, nifti1.extensions.length);
             let bytes = nifti1.toArrayBuffer(true);
             let copy = nifti.readHeader(bytes);
             assert.equal(2, copy.extensions.length);
             assert.equal(4, copy.extensions[1].ecode);
-            console.log(copy.extensions[1]);
             assert.equal(24, copy.extensions[1].edata.byteLength);
         });
 
@@ -121,9 +116,6 @@ describe('NIFTI-Reader-JS', function () {
             assert.equal(2, nifti1.extensions.length);
             let bytes = nifti1.toArrayBuffer(true);
             let copy = nifti.readHeader(bytes);
-            console.log('extension is ')
-            console.log(copy.extensions[0]);
-            console.log(copy.extensions[1]);
             assert.equal(2, copy.extensions.length);
             assert.equal(4, copy.extensions[0].ecode);
             assert.equal(32, copy.extensions[0].esize);

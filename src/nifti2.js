@@ -51,6 +51,7 @@ nifti.NIFTIEXTENSION = nifti.NIFTIEXTENSION || ((typeof require !== 'undefined')
  * @property {Array.<Array.<number>>} affine
  * @property {string} magic
  * @property {number[]} extensionFlag
+ * @property {nifti.NIFTIEXTENSION[]} extensions
  * @type {Function}
  */
 nifti.NIFTI2 = nifti.NIFTI2 || function () {
@@ -89,6 +90,7 @@ nifti.NIFTI2 = nifti.NIFTI2 || function () {
     this.affine = [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]];
     this.magic = 0;
     this.extensionFlag = [0, 0, 0, 0];
+    this.extensions = [];
 };
 
 
@@ -413,7 +415,7 @@ nifti.NIFTI2.prototype.nifti_mat33_determ = nifti.NIFTI1.prototype.nifti_mat33_d
     const INT64_SIZE = 8;
     const DOUBLE_SIZE = 8;
 
-    let byteSize = 540;
+    let byteSize = 540 + 4; // +4 for extension bytes
     // calculate necessary size
     if(includeExtensions) {
         for(let extension of this.extensions) {
