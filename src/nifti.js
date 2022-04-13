@@ -17,6 +17,7 @@ nifti.NIFTIEXTENSION = nifti.NIFTIEXTENSION || ((typeof require !== 'undefined')
 nifti.Utils = nifti.Utils || ((typeof require !== 'undefined') ? require('./utilities.js') : null);
 
 var pako = pako || ((typeof require !== 'undefined') ? require('pako') : null);
+var fflate = fflate || ((typeof require !== 'undefined') ? require('fflate') : null);
 
 /*** Static Methods ***/
 
@@ -113,7 +114,7 @@ nifti.isCompressed = function (data) {
  * @returns {ArrayBuffer}
  */
 nifti.decompress = function (data) {
-    return pako.inflate(data).buffer;
+    return fflate.decompressSync(new Uint8Array(data)).buffer;
 };
 
 
