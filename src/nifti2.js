@@ -100,6 +100,7 @@ nifti.NIFTI2 = nifti.NIFTI2 || function () {
 nifti.NIFTI2.MAGIC_COOKIE = 540;
 nifti.NIFTI2.MAGIC_NUMBER_LOCATION = 4;
 nifti.NIFTI2.MAGIC_NUMBER = [0x6E, 0x2B, 0x32, 0, 0x0D, 0x0A, 0x1A, 0x0A];  // n+2\0
+nifti.NIFTI2.MAGIC_NUMBER2 = [0x6E, 0x69, 0x32, 0, 0x0D, 0x0A, 0x1A, 0x0A];  // ni2\0
 
 
 

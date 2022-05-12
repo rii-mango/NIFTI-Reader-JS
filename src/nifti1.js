@@ -1074,7 +1074,7 @@ nifti.NIFTI1.prototype.toArrayBuffer = function(includeExtensions = false) {
     const flattened = this.affine.flat();
     // we only want the first three rows
     for(let i = 0; i < 12; i++) {
-        view.setFloat32(280 + FLOAT32_SIZE * i, flattened[i]);
+        view.setFloat32(280 + FLOAT32_SIZE * i, flattened[i], this.littleEndian);
     }
     
     // intent_name and magic
