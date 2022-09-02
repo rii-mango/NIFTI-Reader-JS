@@ -8,7 +8,7 @@
 
 var nifti = nifti || {};
 nifti.Utils = nifti.Utils || {};
-
+nifti.NIFTIEXTENSION = nifti.NIFTIEXTENSION || ((typeof require !== 'undefined') ? require('./nifti-extension.js') : null);
 
 
 /*** Static Pseudo-constants ***/
@@ -81,6 +81,44 @@ nifti.Utils.getLongAt = function (data, start, littleEndian) {
     return value;
 };
 
+nifti.Utils.getExtensionsAt = function (data, start, littleEndian, voxOffset) {
+    let extensions = [];
+    let extensionByteIndex = start;
+
+    // Multiple extended header sections are allowed
+    while(extensionByteIndex < voxOffset ) {
+        // assume same endianess as header until proven otherwise
+        let extensionLittleEndian = littleEndian;
+        let esize = nifti.Utils.getIntAt(data, extensionByteIndex, littleEndian);
+        if(!esize) {
+            break; // no more extensions
+        }
+        
+        // check if this takes us past vox_offset
+        if(esize + extensionByteIndex > voxOffset) {
+            // check if reversing byte order gets a proper size
+            extensionLittleEndian = !extensionLittleEndian;
+            esize = nifti.Utils.getIntAt(data, extensionByteIndex, extensionLittleEndian);
+            if(esize + extensionByteIndex > voxOffset) {
+                throw new Error('This does not appear to be a valid NIFTI extension');
+            }
+        }
+
+        // esize must be a positive integral multiple of 16
+        if(esize % 16 != 0) {
+            throw new Error("This does not appear to be a NIFTI extension");
+        }
+
+        let ecode = nifti.Utils.getIntAt(data, extensionByteIndex + 4, extensionLittleEndian);
+        let edata = data.buffer.slice(extensionByteIndex + 8, extensionByteIndex + esize);
+        console.log('extensionByteIndex: ' + (extensionByteIndex + 8) + ' esize: ' + esize);
+        console.log(edata);
+        let extension = new nifti.NIFTIEXTENSION(esize, ecode, edata, extensionLittleEndian);
+        extensions.push(extension);
+        extensionByteIndex += esize; 
+    }
+    return extensions;
+}
 
 
 nifti.Utils.toArrayBuffer = function (buffer) {

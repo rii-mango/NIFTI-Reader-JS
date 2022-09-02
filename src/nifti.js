@@ -13,11 +13,11 @@
 var nifti = nifti || {};
 nifti.NIFTI1 = nifti.NIFTI1 || ((typeof require !== 'undefined') ? require('./nifti1.js') : null);
 nifti.NIFTI2 = nifti.NIFTI2 || ((typeof require !== 'undefined') ? require('./nifti2.js') : null);
+nifti.NIFTIEXTENSION = nifti.NIFTIEXTENSION || ((typeof require !== 'undefined') ? require('./nifti-extension.js') : null);
 nifti.Utils = nifti.Utils || ((typeof require !== 'undefined') ? require('./utilities.js') : null);
 
 var pako = pako || ((typeof require !== 'undefined') ? require('pako') : null);
-
-
+var fflate = fflate || ((typeof require !== 'undefined') ? require('fflate') : null);
 
 /*** Static Methods ***/
 
@@ -26,9 +26,8 @@ var pako = pako || ((typeof require !== 'undefined') ? require('pako') : null);
  * @param {ArrayBuffer} data
  * @returns {boolean}
  */
-nifti.isNIFTI1 = function (data) {
+nifti.isNIFTI1 = function (data, isHdrImgPairOK = false) {
     var buf, mag1, mag2, mag3;
-
     if (data.byteLength < nifti.NIFTI1.STANDARD_HEADER_SIZE) {
         return false;
     }
@@ -41,6 +40,10 @@ nifti.isNIFTI1 = function (data) {
     mag2 = buf.getUint8(nifti.NIFTI1.MAGIC_NUMBER_LOCATION + 1);
     mag3 = buf.getUint8(nifti.NIFTI1.MAGIC_NUMBER_LOCATION + 2);
 
+    if ((isHdrImgPairOK) && (mag1 === nifti.NIFTI1.MAGIC_NUMBER2[0]) && (mag2 === nifti.NIFTI1.MAGIC_NUMBER2[1]) &&
+        (mag3 === nifti.NIFTI1.MAGIC_NUMBER2[2]))
+        return true; // hdr/img pair
+
     return !!((mag1 === nifti.NIFTI1.MAGIC_NUMBER[0]) && (mag2 === nifti.NIFTI1.MAGIC_NUMBER[1]) &&
         (mag3 === nifti.NIFTI1.MAGIC_NUMBER[2]));
 };
@@ -51,7 +54,7 @@ nifti.isNIFTI1 = function (data) {
  * @param {ArrayBuffer} data
  * @returns {boolean}
  */
-nifti.isNIFTI2 = function (data) {
+nifti.isNIFTI2 = function (data, isHdrImgPairOK = false) {
     var buf, mag1, mag2, mag3;
 
     if (data.byteLength < nifti.NIFTI1.STANDARD_HEADER_SIZE) {
@@ -62,6 +65,10 @@ nifti.isNIFTI2 = function (data) {
     mag1 = buf.getUint8(nifti.NIFTI2.MAGIC_NUMBER_LOCATION);
     mag2 = buf.getUint8(nifti.NIFTI2.MAGIC_NUMBER_LOCATION + 1);
     mag3 = buf.getUint8(nifti.NIFTI2.MAGIC_NUMBER_LOCATION + 2);
+
+    if ((isHdrImgPairOK) && (mag1 === nifti.NIFTI2.MAGIC_NUMBER2[0]) && (mag2 === nifti.NIFTI2.MAGIC_NUMBER2[1]) &&
+        (mag3 === nifti.NIFTI2.MAGIC_NUMBER2[2]))
+        return true; // hdr/img pair
 
     return !!((mag1 === nifti.NIFTI2.MAGIC_NUMBER[0]) && (mag2 === nifti.NIFTI2.MAGIC_NUMBER[1]) &&
     (mag3 === nifti.NIFTI2.MAGIC_NUMBER[2]));
@@ -74,8 +81,8 @@ nifti.isNIFTI2 = function (data) {
  * @param {ArrayBuffer} data
  * @returns {boolean}
  */
-nifti.isNIFTI = function (data) {
-    return (nifti.isNIFTI1(data) || nifti.isNIFTI2(data));
+nifti.isNIFTI = function (data, isHdrImgPairOK = false) {
+    return (nifti.isNIFTI1(data, isHdrImgPairOK) || nifti.isNIFTI2(data, isHdrImgPairOK));
 };
 
 
@@ -114,7 +121,7 @@ nifti.isCompressed = function (data) {
  * @returns {ArrayBuffer}
  */
 nifti.decompress = function (data) {
-    return pako.inflate(data).buffer;
+    return fflate.decompressSync(new Uint8Array(data)).buffer;
 };
 
 
@@ -124,16 +131,16 @@ nifti.decompress = function (data) {
  * @param {ArrayBuffer} data
  * @returns {nifti.NIFTI1|nifti.NIFTI2|null}
  */
-nifti.readHeader = function (data) {
+nifti.readHeader = function (data, isHdrImgPairOK = false) {
     var header = null;
 
     if (nifti.isCompressed(data)) {
         data = nifti.decompress(data);
     }
 
-    if (nifti.isNIFTI1(data)) {
+    if (nifti.isNIFTI1(data, isHdrImgPairOK)) {
         header = new nifti.NIFTI1();
-    } else if (nifti.isNIFTI2(data)) {
+    } else if (nifti.isNIFTI2(data, isHdrImgPairOK)) {
         header = new nifti.NIFTI2();
     }
 
@@ -209,7 +216,7 @@ nifti.readExtensionData = function (header, data) {
     var loc = header.getExtensionLocation(),
         size = header.extensionSize;
 
-    return data.slice(loc + 8, loc + size - 8);
+    return data.slice(loc + 8, loc + size); // +8 for loc and -8 for esize and ecode
 };
 
 

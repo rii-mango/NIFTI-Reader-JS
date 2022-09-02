@@ -1,19 +1,20 @@
 {
   "name": "nifti-reader-js",
-  "version": "0.5.4",
+  "version": "0.5.5",
   "description": "A JavaScript NIfTI file format reader.",
   "main": "src/nifti.js",
   "directories": {
     "test": "tests"
   },
   "dependencies": {
+    "fflate": "*",
     "pako": "*"
   },
   "devDependencies": {
-    "mocha": "*",
     "browserify": "*",
-    "uglifyjs": "*",
-    "jsdoc-to-markdown": "*"
+    "jsdoc-to-markdown": "*",
+    "mocha": "*",
+    "uglifyjs": "^2.4.11"
   },
   "scripts": {
     "test": "mocha --timeout 0 tests",
