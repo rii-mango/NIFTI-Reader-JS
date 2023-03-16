@@ -120,7 +120,8 @@ nifti.isCompressed = function (data) {
  * @returns {ArrayBuffer}
  */
 nifti.decompress = function (data) {
-    return fflate.decompressSync(new Uint8Array(data)).buffer;
+    const decompressed = fflate.decompressSync(new Uint8Array(data)).buffer;
+    return decompressed
 };
 
 
