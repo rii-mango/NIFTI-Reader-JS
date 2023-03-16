@@ -16,7 +16,6 @@ nifti.NIFTI2 = nifti.NIFTI2 || ((typeof require !== 'undefined') ? require('./ni
 nifti.NIFTIEXTENSION = nifti.NIFTIEXTENSION || ((typeof require !== 'undefined') ? require('./nifti-extension.js') : null);
 nifti.Utils = nifti.Utils || ((typeof require !== 'undefined') ? require('./utilities.js') : null);
 
-var pako = pako || ((typeof require !== 'undefined') ? require('pako') : null);
 var fflate = fflate || ((typeof require !== 'undefined') ? require('fflate') : null);
 
 /*** Static Methods ***/
