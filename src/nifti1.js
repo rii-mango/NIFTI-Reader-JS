@@ -238,7 +238,7 @@ nifti.NIFTI1.prototype.readHeader = function (data) {
     // Added by znshje on 27/11/2021
     //
     /* See: https://nifti.nimh.nih.gov/pub/dist/src/niftilib/nifti1.h */
-    if (this.qform_code > 0) {
+    if ((this.qform_code > 0) && (this.sform_code < this.qform_code)) {
         //   METHOD 2 (used when qform_code > 0, which should be the "normal" case):
         //    ---------------------------------------------------------------------
         //    The (x,y,z) coordinates are given by the pixdim[] scales, a rotation
