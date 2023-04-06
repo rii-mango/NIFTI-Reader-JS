@@ -10,14 +10,13 @@
     "fflate": "*"
   },
   "devDependencies": {
-    "browserify": "*",
+    "esbuild": "*",
     "jsdoc-to-markdown": "*",
-    "mocha": "*",
-    "uglifyjs": "^2.4.11"
+    "mocha": "*"
   },
   "scripts": {
     "test": "mocha --timeout 0 tests",
-    "build": "rm -rf build; mkdir build; browserify --standalone nifti src/nifti.js -o build/nifti-reader.js; uglifyjs build/nifti-reader.js -o build/nifti-reader-min.js",
+    "build": "rm -rf build; mkdir build; esbuild src/nifti.js --bundle --outfile=build/nifti-reader.js; esbuild src/nifti.js --bundle --minify --outfile=build/nifti-reader-min.js",
     "release": "rm release/current/*.js; cp build/*.js release/current/.",
     "doc": "rm -rf build; mkdir build; ./node_modules/.bin/jsdoc2md src/*.js > build/docs.md"
   },
