@@ -4,7 +4,7 @@
     "lib": ["ESNext", "dom"], // specifies which default set of type definitions to use ("DOM", "ES6", etc)
     "outDir": "build", // .js (as well as .d.ts, .js.map, etc.) files will be emitted into this directory.,
     "removeComments": true, // Strips all comments from TypeScript files when converting into JavaScript- you rarely read compiled code so this saves space
-    "target": "ES6", // Target environment. Most modern browsers support ES6, but you may want to set it to newer or older. (defaults to ES3)
+    "target": "ES5", // Target environment. Most modern browsers support ES6, but you may want to set it to newer or older. (defaults to ES3)
 
     "declaration": true,
     "emitDeclarationOnly": true,
@@ -16,6 +16,7 @@
     "baseUrl": "./", // Lets you set a base directory to resolve non-absolute module names.
     "esModuleInterop": true, // fixes some issues TS originally had with the ES6 spec where TypeScript treats CommonJS/AMD/UMD modules similar to ES6 module
     "moduleResolution": "node", // Pretty much always node for modern JS. Other option is "classic"
+    "module": "CommonJS",
     "paths": {}, // A series of entries which re-map imports to lookup locations relative to the baseUrl
 
     // Source Map
@@ -35,5 +36,5 @@
     "noUnusedParameters": true // Report errors on unused parameters in functions
   },
   "include": ["./src/*.ts", "./src/*.js"],
-  "exclude": ["node_modules/**/*"]
+  "exclude": ["node_modules", "dist"]
 }
