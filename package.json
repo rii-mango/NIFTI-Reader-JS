@@ -8,19 +8,19 @@
     "test": "tests"
   },
   "dependencies": {
+    "esbuild": "^0.17.15",
     "fflate": "*"
   },
   "devDependencies": {
-    "browserify": "*",
     "jsdoc-to-markdown": "*",
     "mocha": "*",
-    "typescript": "^5.0.4",
-    "uglifyjs": "^2.4.11"
+    "typescript": "^5.0.4"
   },
   "scripts": {
     "test": "mocha --timeout 0 tests",
     "typecheck": "tsc -b",
-    "build": "rm -rf build; mkdir build; npm run typecheck; browserify --standalone nifti src/nifti.js -o build/nifti-reader.js; uglifyjs build/nifti-reader.js -o build/nifti-reader-min.js",
+    "bundle": "esbuild ./src/nifti.js --bundle --tsconfig=tsconfig.json --outdir=build --minify",
+    "build": "rm -rf build && mkdir build && npm run typecheck && npm run bundle",
     "release": "rm release/current/*.js; cp build/*.js release/current/.",
     "doc": "rm -rf build; mkdir build; ./node_modules/.bin/jsdoc2md src/*.js > build/docs.md"
   },
