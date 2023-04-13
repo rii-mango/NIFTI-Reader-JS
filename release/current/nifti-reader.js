@@ -5118,6 +5118,12 @@ nifti.NIFTI1.prototype.readHeader = function (data) {
     // Added by znshje on 27/11/2021
     //
     /* See: https://nifti.nimh.nih.gov/pub/dist/src/niftilib/nifti1.h */
+    if ((this.qform_code < 1) && (this.sform_code < 1)) {
+        // METHOD 0 (used when both SFORM and QFORM are unknown)
+        this.affine[0][0] = this.pixDims[1];
+        this.affine[1][1] = this.pixDims[2];
+        this.affine[2][2] = this.pixDims[3];
+    }
     if ((this.qform_code > 0) && (this.sform_code < this.qform_code)) {
         //   METHOD 2 (used when qform_code > 0, which should be the "normal" case):
         //    ---------------------------------------------------------------------
