@@ -7,20 +7,29 @@
     "test": "tests"
   },
   "dependencies": {
+    "@types/pako": "^2.0.0",
     "fflate": "*",
-    "pako": "*"
+    "pako": "*",
+    "typescript": "^5.0.4"
   },
   "devDependencies": {
+    "@types/chai": "^4.3.4",
+    "@types/mocha": "^10.0.1",
+    "@types/node": "^18.16.0",
     "browserify": "*",
+    "chai": "^4.3.7",
     "jsdoc-to-markdown": "*",
     "mocha": "*",
+    "ts-node": "^10.9.1",
+    "tsify": "^5.0.4",
     "uglifyjs": "^2.4.11"
   },
   "scripts": {
-    "test": "mocha --timeout 0 tests",
-    "build": "rm -rf build; mkdir build; browserify --standalone nifti src/nifti.js -o build/nifti-reader.js; uglifyjs build/nifti-reader.js -o build/nifti-reader-min.js",
+    "test": "mocha -r ts-node/register __tests__/**/*.spec.ts",
+    "build": "rm -rf build; mkdir build; tsc; browserify --standalone nifti dist/src/nifti.js -o build/nifti-reader.js; uglifyjs build/nifti-reader.js -o build/nifti-reader-min.js",
     "release": "rm release/current/*.js; cp build/*.js release/current/.",
-    "doc": "rm -rf build; mkdir build; ./node_modules/.bin/jsdoc2md src/*.js > build/docs.md"
+    "doc": "rm -rf build; mkdir build; ./node_modules/.bin/jsdoc2md src/*.js > build/docs.md",
+    "test-js": "npm run build; npm run release; mocha --timeout 0 tests"
   },
   "repository": {
     "type": "git",

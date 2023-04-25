@@ -7,7 +7,7 @@
 var assert = require("assert");
 var fs = require('fs');
 
-var nifti = require('../src/nifti.js');
+var nifti = require('../dist/src/nifti.js');
 
 var buf = fs.readFileSync('./tests/data/5D_zeros.nii.gz');
 var data = nifti.Utils.toArrayBuffer(buf);

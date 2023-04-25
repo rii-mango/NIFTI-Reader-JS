@@ -16,7 +16,7 @@
 var assert = require("assert");
 var fs = require('fs');
 
-var nifti = require('../src/nifti.js');
+var nifti = require('../dist/src/nifti.js');
 
 var buf = fs.readFileSync('./tests/data/air2.hdr.gz');
 var data = nifti.Utils.toArrayBuffer(buf);
@@ -84,7 +84,9 @@ describe('NIFTI-Reader-JS', function () {
             nifti2 = nifti.readHeader(data, true);
             bytes = nifti2.toArrayBuffer();
             clone = nifti.readHeader(bytes, true);
-            assert.deepEqual(clone, nifti2);
+            var nifti1Text = JSON.stringify(nifti2);
+            var cloneText = JSON.stringify(clone);
+            assert.equal(cloneText, nifti1Text);
         });
 
     });
