@@ -7,10 +7,10 @@
 var assert = require("assert");
 var fs = require('fs');
 
-var nifti = require('../src/nifti.js');
+var nifti = require('../dist/src/nifti.js');
 
 // var buf = fs.readFileSync('./tests/data/afni.nii.gz');
-var buf = fs.readFileSync('./tests/data/with_extension.nii.gz');
+var buf = fs.readFileSync('./data/with_extension.nii.gz');
 var data = nifti.Utils.toArrayBuffer(buf);
 var nifti1 = null;
 var extension = null;
