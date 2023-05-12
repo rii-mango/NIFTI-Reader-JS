@@ -1,8 +1,9 @@
 {
   "name": "nifti-reader-js",
-  "version": "0.6.4",
+  "version": "0.6.5",
   "description": "A JavaScript NIfTI file format reader.",
-  "main": "src/nifti.js",
+  "main": "dist/src/nifti.js",
+  "types": "dist/src/nifti.d.ts",
   "directories": {
     "test": "tests"
   },
@@ -10,15 +11,22 @@
     "fflate": "*"
   },
   "devDependencies": {
+    "@types/chai": "^4.3.5",
+    "@types/mocha": "^10.0.1",
+    "chai": "^4.3.7",
     "esbuild": "*",
     "jsdoc-to-markdown": "*",
-    "mocha": "*"
+    "mocha": "*",
+    "ts-node": "^10.9.1",
+    "tsify": "^5.0.4",
+    "typescript": "^5.0.4"
   },
   "scripts": {
-    "test": "mocha --timeout 0 tests",
-    "build": "rm -rf build; mkdir build; esbuild src/nifti.js --bundle --outfile=build/nifti-reader.js; esbuild src/nifti.js --bundle --minify --outfile=build/nifti-reader-min.js",
+    "test": "mocha -r ts-node/register __tests__/**/*.spec.ts",
+    "test-js": "npm run build; npm run release; mocha --timeout 0 tests",
+    "build": "rm -rf build; mkdir build; tsc; esbuild dist/src/nifti.js --bundle --outfile=build/nifti-reader.js; esbuild dist/src/nifti.js --bundle --minify --outfile=build/nifti-reader-min.js",
     "release": "rm release/current/*.js; cp build/*.js release/current/.",
-    "doc": "rm -rf build; mkdir build; ./node_modules/.bin/jsdoc2md src/*.js > build/docs.md"
+    "doc": "rm -rf build; mkdir build; ./node_modules/.bin/jsdoc2md dist/src/*.js > build/docs.md"
   },
   "repository": {
     "type": "git",
