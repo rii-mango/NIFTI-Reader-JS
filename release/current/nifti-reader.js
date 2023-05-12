@@ -2483,7 +2483,12 @@
           this.qoffset_x = utilities_1.Utils.getFloatAt(rawData, 268, this.littleEndian);
           this.qoffset_y = utilities_1.Utils.getFloatAt(rawData, 272, this.littleEndian);
           this.qoffset_z = utilities_1.Utils.getFloatAt(rawData, 276, this.littleEndian);
-          if (this.qform_code > 0) {
+          if (this.qform_code < 1 && this.sform_code < 1) {
+            this.affine[0][0] = this.pixDims[1];
+            this.affine[1][1] = this.pixDims[2];
+            this.affine[2][2] = this.pixDims[3];
+          }
+          if (this.qform_code > 0 && this.sform_code < this.qform_code) {
             const a = this.quatern_a;
             const b = this.quatern_b;
             const c = this.quatern_c;
