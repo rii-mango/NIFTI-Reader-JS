@@ -4,6 +4,17 @@ A JavaScript [NIfTI](http://nifti.nimh.nih.gov/) file format reader.  This reade
 ### Usage
 [API](https://github.com/rii-mango/NIFTI-Reader-JS/wiki/API), [drawing to canvas example](https://github.com/rii-mango/NIFTI-Reader-JS/blob/master/tests/canvas.html) and [more](https://github.com/rii-mango/NIFTI-Reader-JS/tree/master/tests)
 
+Using in a HTML `script` tag to emulate older behaviour prior to the esbuild changes in `v0.6.4`:
+
+```html
+<script type="module">
+    import * as nifti from './nifti-reader.js';
+    window.nifti = nifti.default;
+    console.log(nifti);
+</script>
+``` 
+
+
 ```javascript
 var data = // an ArrayBuffer
 var niftiHeader = null,
