@@ -84,9 +84,9 @@
             if(niftiHeader.scl_slope) {
                 nonNaN = nonNaN.map(x => x * niftiHeader.scl_slope + niftiHeader.scl_inter);
             }
-            var minValue = nonNaN.reduce((a, b) => Math.min(a, b)) || 0;
+            var minValue = nonNaN.reduce((a, b) => Math.min(a, b));
             var maxValue = nonNaN.reduce((a, b) => Math.max(a, b));
-            var diff = maxValue - minValue;
+            var diff = (maxValue - minValue) || 1;
             // draw pixels
             for (var row = 0; row < rows; row++) {
                 var rowOffset = row * cols;
@@ -94,9 +94,6 @@
                 for (var col = 0; col < cols; col++) {
                     var offset = sliceOffset + rowOffset + col;
                     var value = nonNaN[offset];
-                    // if(isNaN(value)) {
-                    //     continue;
-                    // }
                     value = value / diff * 255;
                     /* 
                        Assumes data is 8-bit, otherwise you would need to first convert 
