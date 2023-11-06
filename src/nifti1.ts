@@ -388,7 +388,7 @@ import { Utils } from "./utilities";
         this.extensionFlag[1] = Utils.getByteAt(rawData, 348 + 1);
         this.extensionFlag[2] = Utils.getByteAt(rawData, 348 + 2);
         this.extensionFlag[3] = Utils.getByteAt(rawData, 348 + 3);
-        if (this.extensionFlag[0]) {
+        if (this.vox_offset > 352 && this.extensionFlag[0]) {
           // read our extensions
           this.extensions = Utils.getExtensionsAt(
             rawData,
