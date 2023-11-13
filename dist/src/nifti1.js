@@ -325,7 +325,12 @@ class NIFTI1 {
             this.extensionFlag[1] = utilities_1.Utils.getByteAt(rawData, 348 + 1);
             this.extensionFlag[2] = utilities_1.Utils.getByteAt(rawData, 348 + 2);
             this.extensionFlag[3] = utilities_1.Utils.getByteAt(rawData, 348 + 3);
-            if (this.extensionFlag[0]) {
+            let isExtensionCapable = true;
+            if ((!this.isHDR) && (this.vox_offset <= 352))
+                isExtensionCapable = false;
+            if (rawData.byteLength <= (352 + 16))
+                isExtensionCapable = false;
+            if (isExtensionCapable && this.extensionFlag[0]) {
                 // read our extensions
                 this.extensions = utilities_1.Utils.getExtensionsAt(rawData, this.getExtensionLocation(), this.littleEndian, this.vox_offset);
                 // set the extensionSize and extensionCode from the first extension found
