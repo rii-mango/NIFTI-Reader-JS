@@ -123,7 +123,7 @@ export { NIFTIEXTENSION } from "./nifti-extension";
   /**
    * Reads and returns the header object.
    * @param {ArrayBuffer} data
-   * @returns {NIFTI1|NIFTI2|null}
+   * @returns {NIFTI1|NIFTI2}
    */
   export function readHeader(data: ArrayBuffer, isHdrImgPairOK = false) {
     var header = null;
@@ -141,7 +141,7 @@ export { NIFTIEXTENSION } from "./nifti-extension";
     if (header) {
       header.readHeader(data);
     } else {
-      console.error("That file does not appear to be NIFTI!");
+      throw new Error('That file does not appear to be NIFTI!');
     }
 
     return header;
