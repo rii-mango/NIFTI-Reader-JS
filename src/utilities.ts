@@ -126,10 +126,6 @@ export class Utils {
         extensionByteIndex + 8,
         extensionByteIndex + esize
       );
-      console.log(
-        "extensionByteIndex: " + (extensionByteIndex + 8) + " esize: " + esize
-      );
-      console.log(edata);
       let extension = new NIFTIEXTENSION(
         esize,
         ecode,
