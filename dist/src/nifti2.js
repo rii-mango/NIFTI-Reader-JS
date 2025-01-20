@@ -117,7 +117,7 @@ class NIFTI2 {
         this.numBitsPerVoxel = utilities_1.Utils.getShortAt(rawData, 14, this.littleEndian);
         for (ctr = 0; ctr < 8; ctr += 1) {
             index = 16 + ctr * 8;
-            this.dims[ctr] = utilities_1.Utils.getLongAt(rawData, index, this.littleEndian);
+            this.dims[ctr] = utilities_1.Utils.getInt64At(rawData, index, this.littleEndian);
         }
         this.intent_p1 = utilities_1.Utils.getDoubleAt(rawData, 80, this.littleEndian);
         this.intent_p2 = utilities_1.Utils.getDoubleAt(rawData, 88, this.littleEndian);
@@ -126,15 +126,15 @@ class NIFTI2 {
             index = 104 + ctr * 8;
             this.pixDims[ctr] = utilities_1.Utils.getDoubleAt(rawData, index, this.littleEndian);
         }
-        this.vox_offset = utilities_1.Utils.getLongAt(rawData, 168, this.littleEndian);
+        this.vox_offset = utilities_1.Utils.getInt64At(rawData, 168, this.littleEndian);
         this.scl_slope = utilities_1.Utils.getDoubleAt(rawData, 176, this.littleEndian);
         this.scl_inter = utilities_1.Utils.getDoubleAt(rawData, 184, this.littleEndian);
         this.cal_max = utilities_1.Utils.getDoubleAt(rawData, 192, this.littleEndian);
         this.cal_min = utilities_1.Utils.getDoubleAt(rawData, 200, this.littleEndian);
         this.slice_duration = utilities_1.Utils.getDoubleAt(rawData, 208, this.littleEndian);
         this.toffset = utilities_1.Utils.getDoubleAt(rawData, 216, this.littleEndian);
-        this.slice_start = utilities_1.Utils.getLongAt(rawData, 224, this.littleEndian);
-        this.slice_end = utilities_1.Utils.getLongAt(rawData, 232, this.littleEndian);
+        this.slice_start = utilities_1.Utils.getInt64At(rawData, 224, this.littleEndian);
+        this.slice_end = utilities_1.Utils.getInt64At(rawData, 232, this.littleEndian);
         this.description = utilities_1.Utils.getStringAt(rawData, 240, 240 + 80);
         this.aux_file = utilities_1.Utils.getStringAt(rawData, 320, 320 + 24);
         this.qform_code = utilities_1.Utils.getIntAt(rawData, 344, this.littleEndian);

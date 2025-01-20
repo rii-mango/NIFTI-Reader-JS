@@ -64,20 +64,20 @@ export class Utils {
     return data.getFloat64(start, littleEndian);
   }
 
-  static getLongAt(data: DataView, start: number, littleEndian: boolean) {
-    var ctr,
-      array = [],
-      value = 0;
-
-    for (ctr = 0; ctr < 8; ctr += 1) {
-      array[ctr] = Utils.getByteAt(data, start + ctr);
+  static getInt64At(dataView: DataView, index: number, littleEndian: boolean): number {
+    const low = dataView.getUint32(index, littleEndian);
+    const high = dataView.getInt32(index + 4, littleEndian);
+    let result: number;
+    if (littleEndian) {
+        result = high * 2 ** 32 + low;
+    } else {
+      result = low * 2 ** 32 + high;
     }
-
-    for (ctr = array.length - 1; ctr >= 0; ctr--) {
-      value = value * 256 + array[ctr];
+    // Proper sign extension if the high part is negative
+    if (high < 0) {
+      result += -1 * 2 ** 32 * 2 ** 32;
     }
-
-    return value;
+    return result;
   }
 
   static getExtensionsAt(

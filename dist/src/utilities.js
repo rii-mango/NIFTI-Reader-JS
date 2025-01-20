@@ -19,7 +19,7 @@ class Utils {
         return str;
     }
     static getByteAt = function (data, start) {
-        return data.getInt8(start);
+        return data.getUint8(start);
     };
     static getShortAt = function (data, start, littleEndian) {
         return data.getInt16(start, littleEndian);
@@ -33,15 +33,21 @@ class Utils {
     static getDoubleAt(data, start, littleEndian) {
         return data.getFloat64(start, littleEndian);
     }
-    static getLongAt(data, start, littleEndian) {
-        var ctr, array = [], value = 0;
-        for (ctr = 0; ctr < 8; ctr += 1) {
-            array[ctr] = Utils.getByteAt(data, start + ctr);
+    static getInt64At(dataView, index, littleEndian) {
+        const low = dataView.getUint32(index, littleEndian);
+        const high = dataView.getInt32(index + 4, littleEndian);
+        let result;
+        if (littleEndian) {
+            result = high * 2 ** 32 + low;
         }
-        for (ctr = array.length - 1; ctr >= 0; ctr--) {
-            value = value * 256 + array[ctr];
+        else {
+            result = low * 2 ** 32 + high;
         }
-        return value;
+        // Proper sign extension if the high part is negative
+        if (high < 0) {
+            result += -1 * 2 ** 32 * 2 ** 32;
+        }
+        return result;
     }
     static getExtensionsAt(data, start, littleEndian, voxOffset) {
         let extensions = [];

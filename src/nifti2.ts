@@ -129,7 +129,7 @@ export class NIFTI2 {
 
     for (ctr = 0; ctr < 8; ctr += 1) {
       index = 16 + ctr * 8;
-      this.dims[ctr] = Utils.getLongAt(rawData, index, this.littleEndian);
+      this.dims[ctr] = Utils.getInt64At(rawData, index, this.littleEndian);
     }
 
     this.intent_p1 = Utils.getDoubleAt(rawData, 80, this.littleEndian);
@@ -141,7 +141,7 @@ export class NIFTI2 {
       this.pixDims[ctr] = Utils.getDoubleAt(rawData, index, this.littleEndian);
     }
 
-    this.vox_offset = Utils.getLongAt(rawData, 168, this.littleEndian);
+    this.vox_offset = Utils.getInt64At(rawData, 168, this.littleEndian);
 
     this.scl_slope = Utils.getDoubleAt(rawData, 176, this.littleEndian);
     this.scl_inter = Utils.getDoubleAt(rawData, 184, this.littleEndian);
@@ -153,8 +153,8 @@ export class NIFTI2 {
 
     this.toffset = Utils.getDoubleAt(rawData, 216, this.littleEndian);
 
-    this.slice_start = Utils.getLongAt(rawData, 224, this.littleEndian);
-    this.slice_end = Utils.getLongAt(rawData, 232, this.littleEndian);
+    this.slice_start = Utils.getInt64At(rawData, 224, this.littleEndian);
+    this.slice_end = Utils.getInt64At(rawData, 232, this.littleEndian);
 
     this.description = Utils.getStringAt(rawData, 240, 240 + 80);
     this.aux_file = Utils.getStringAt(rawData, 320, 320 + 24);
