@@ -37,7 +37,7 @@ export class Utils {
   }
 
   static getByteAt = function (data: DataView, start: number): number {
-    return data.getInt8(start);
+    return data.getUint8(start);
   };
 
   static getShortAt = function (
