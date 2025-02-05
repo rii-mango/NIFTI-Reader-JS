@@ -1288,8 +1288,8 @@ import { Utils } from "./utilities";
       // glmax, glmin are unused
 
       // descrip and aux_file
-      byteArray.set(Buffer.from(this.description), 148);
-      byteArray.set(Buffer.from(this.aux_file), 228);
+      byteArray.set(new TextEncoder().encode(this.description), 148);
+      byteArray.set(new TextEncoder().encode(this.aux_file), 228);
 
       // qform_code, sform_code
       view.setInt16(252, this.qform_code, this.littleEndian);
@@ -1313,8 +1313,8 @@ import { Utils } from "./utilities";
       }
 
       // intent_name and magic
-      byteArray.set(Buffer.from(this.intent_name), 328);
-      byteArray.set(Buffer.from(this.magic), 344);
+      byteArray.set(new TextEncoder().encode(this.intent_name), 328);
+      byteArray.set(new TextEncoder().encode(this.magic), 344);
 
       // add our extension data
       if (includeExtensions) {

@@ -495,7 +495,7 @@ export class NIFTI2 {
     view.setInt32(0, 540, this.littleEndian);
 
     // magic
-    byteArray.set(Buffer.from(this.magic), 4);
+    byteArray.set(new TextEncoder().encode(this.magic), 4);
 
     // datatype
     view.setInt16(12, this.datatypeCode, this.littleEndian);
@@ -558,10 +558,10 @@ export class NIFTI2 {
     view.setBigInt64(232, BigInt(this.slice_end), this.littleEndian);
 
     // descrip
-    byteArray.set(Buffer.from(this.description), 240);
+    byteArray.set(new TextEncoder().encode(this.description), 240);
 
     // aux_file
-    byteArray.set(Buffer.from(this.aux_file), 320);
+    byteArray.set(new TextEncoder().encode(this.aux_file), 320);
 
     // qform_code
     view.setInt32(344, this.qform_code, this.littleEndian);
@@ -601,7 +601,7 @@ export class NIFTI2 {
     //  intent_code
     view.setInt32(504, this.intent_code, this.littleEndian);
     //  intent_name
-    byteArray.set(Buffer.from(this.intent_name), 508);
+    byteArray.set(new TextEncoder().encode(this.intent_name), 508);
     // dim_info
     view.setUint8(524, this.dim_info);
 
