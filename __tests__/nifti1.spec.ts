@@ -64,5 +64,14 @@ describe("NIFTI-Reader-JS", function () {
       let cloneText = JSON.stringify(clone);
       expect(cloneText).to.equal(niftiHeaderText);
     });
+
+    it("description, aux_file, intent_name and magic are preserved", function () {
+      bytes = nifti1!.toArrayBuffer();
+      clone = readHeader(bytes);
+      expect(clone!.description).to.equal(nifti1!.description);
+      expect(clone!.aux_file).to.equal(nifti1!.aux_file);
+      expect(clone!.intent_name).to.equal(nifti1!.intent_name);
+      expect(clone!.magic).to.equal(nifti1!.magic);
+    });
   });
 });

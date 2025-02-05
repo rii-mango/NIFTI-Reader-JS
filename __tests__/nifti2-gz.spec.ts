@@ -12,6 +12,12 @@ import * as fs from "fs";
 import { Utils } from "../src/utilities";
 import { NIFTI2 } from "../src/nifti2";
 
+function parseJSONFromBytes(bytes: Uint8Array): any {
+  const decoder = new TextDecoder();
+  const jsonString = decoder.decode(bytes);
+  return JSON.parse(jsonString);
+}
+
 const buf = fs.readFileSync("./data/avg152T1_LR_nifti2.nii.gz");
 let data = Utils.toArrayBuffer(buf);
 let nifti2: NIFTI1 | NIFTI2 | null;
@@ -70,6 +76,15 @@ describe("NIFTI-Reader-JS", function () {
       let niftiHeaderText = JSON.stringify(nifti2);
       let cloneText = JSON.stringify(clone);
       expect(cloneText).to.equal(niftiHeaderText);
+    });
+
+    it("description, aux_file, intent_name and magic are preserved", function() {
+      bytes = nifti2!.toArrayBuffer();
+      clone = readHeader(bytes); 
+      expect(clone!.description).to.equal(nifti2!.description);
+      expect(clone!.aux_file).to.equal(nifti2!.aux_file);
+      expect(clone!.intent_name).to.equal(nifti2!.intent_name);
+      expect(clone!.magic).to.equal(nifti2!.magic);
     });
   });
 });
