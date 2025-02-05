@@ -12,7 +12,7 @@ export declare class Utils {
     static getIntAt(data: DataView, start: number, littleEndian: boolean): number;
     static getFloatAt(data: DataView, start: number, littleEndian: boolean): number;
     static getDoubleAt(data: DataView, start: number, littleEndian: boolean): number;
-    static getLongAt(data: DataView, start: number, littleEndian: boolean): number;
+    static getInt64At(dataView: DataView, index: number, littleEndian: boolean): number;
     static getExtensionsAt(data: DataView, start: number, littleEndian: boolean, voxOffset: number): NIFTIEXTENSION[];
     static toArrayBuffer(buffer: TypedArray): ArrayBuffer;
     static isString(obj: Object): boolean;
