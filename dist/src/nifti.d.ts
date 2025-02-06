@@ -38,9 +38,9 @@ export declare function decompress(data: ArrayBuffer): ArrayBufferLike;
 /**
  * Reads and returns the header object.
  * @param {ArrayBuffer} data
- * @returns {NIFTI1|NIFTI2|null}
+ * @returns {NIFTI1|NIFTI2}
  */
-export declare function readHeader(data: ArrayBuffer, isHdrImgPairOK?: boolean): NIFTI1 | NIFTI2 | null;
+export declare function readHeader(data: ArrayBuffer, isHdrImgPairOK?: boolean): NIFTI1 | NIFTI2;
 /**
  * Returns true if this header contains an extension.
  * @param {NIFTI1|NIFTI2} header

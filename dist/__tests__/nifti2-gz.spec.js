@@ -27,6 +27,11 @@ const nifti_1 = require("../src/nifti");
 const chai_1 = require("chai");
 const fs = __importStar(require("fs"));
 const utilities_1 = require("../src/utilities");
+function parseJSONFromBytes(bytes) {
+    const decoder = new TextDecoder();
+    const jsonString = decoder.decode(bytes);
+    return JSON.parse(jsonString);
+}
 const buf = fs.readFileSync("./data/avg152T1_LR_nifti2.nii.gz");
 let data = utilities_1.Utils.toArrayBuffer(buf);
 let nifti2;
@@ -75,6 +80,14 @@ describe("NIFTI-Reader-JS", function () {
             let niftiHeaderText = JSON.stringify(nifti2);
             let cloneText = JSON.stringify(clone);
             (0, chai_1.expect)(cloneText).to.equal(niftiHeaderText);
+        });
+        it("description, aux_file, intent_name and magic are preserved", function () {
+            bytes = nifti2.toArrayBuffer();
+            clone = (0, nifti_1.readHeader)(bytes);
+            (0, chai_1.expect)(clone.description).to.equal(nifti2.description);
+            (0, chai_1.expect)(clone.aux_file).to.equal(nifti2.aux_file);
+            (0, chai_1.expect)(clone.intent_name).to.equal(nifti2.intent_name);
+            (0, chai_1.expect)(clone.magic).to.equal(nifti2.magic);
         });
     });
 });

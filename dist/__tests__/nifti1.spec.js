@@ -71,6 +71,14 @@ describe("NIFTI-Reader-JS", function () {
             let cloneText = JSON.stringify(clone);
             (0, chai_1.expect)(cloneText).to.equal(niftiHeaderText);
         });
+        it("description, aux_file, intent_name and magic are preserved", function () {
+            bytes = nifti1.toArrayBuffer();
+            clone = (0, nifti_1.readHeader)(bytes);
+            (0, chai_1.expect)(clone.description).to.equal(nifti1.description);
+            (0, chai_1.expect)(clone.aux_file).to.equal(nifti1.aux_file);
+            (0, chai_1.expect)(clone.intent_name).to.equal(nifti1.intent_name);
+            (0, chai_1.expect)(clone.magic).to.equal(nifti1.magic);
+        });
     });
 });
 //# sourceMappingURL=nifti1.spec.js.map

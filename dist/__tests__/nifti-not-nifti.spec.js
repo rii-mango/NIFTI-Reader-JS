@@ -38,7 +38,7 @@ describe('NIFTI-Reader-JS', function () {
             chai_1.assert.equal(false, (0, nifti_1.isNIFTI)(data));
         });
         it('readHeader() should return null', function () {
-            chai_1.assert.equal(null, (0, nifti_1.readHeader)(data));
+            chai_1.assert.throws(() => (0, nifti_1.readHeader)(data), 'That file does not appear to be NIFTI!');
         });
     });
 });

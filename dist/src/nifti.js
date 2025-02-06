@@ -129,7 +129,7 @@ exports.decompress = decompress;
 /**
  * Reads and returns the header object.
  * @param {ArrayBuffer} data
- * @returns {NIFTI1|NIFTI2|null}
+ * @returns {NIFTI1|NIFTI2}
  */
 function readHeader(data, isHdrImgPairOK = false) {
     var header = null;
@@ -146,7 +146,7 @@ function readHeader(data, isHdrImgPairOK = false) {
         header.readHeader(data);
     }
     else {
-        console.error("That file does not appear to be NIFTI!");
+        throw new Error('That file does not appear to be NIFTI!');
     }
     return header;
 }
