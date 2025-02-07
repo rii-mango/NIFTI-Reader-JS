@@ -2272,15 +2272,19 @@
         static getDoubleAt(data, start, littleEndian) {
           return data.getFloat64(start, littleEndian);
         }
-        static getLongAt(data, start, littleEndian) {
-          var ctr, array = [], value = 0;
-          for (ctr = 0; ctr < 8; ctr += 1) {
-            array[ctr] = _Utils.getByteAt(data, start + ctr);
+        static getInt64At(dataView, index, littleEndian) {
+          const low = dataView.getUint32(index, littleEndian);
+          const high = dataView.getInt32(index + 4, littleEndian);
+          let result;
+          if (littleEndian) {
+            result = high * 2 ** 32 + low;
+          } else {
+            result = low * 2 ** 32 + high;
           }
-          for (ctr = array.length - 1; ctr >= 0; ctr--) {
-            value = value * 256 + array[ctr];
+          if (high < 0) {
+            result += -1 * 2 ** 32 * 2 ** 32;
           }
-          return value;
+          return result;
         }
         static getExtensionsAt(data, start, littleEndian, voxOffset) {
           let extensions = [];
@@ -2303,8 +2307,6 @@
             }
             let ecode = _Utils.getIntAt(data, extensionByteIndex + 4, extensionLittleEndian);
             let edata = data.buffer.slice(extensionByteIndex + 8, extensionByteIndex + esize);
-            console.log("extensionByteIndex: " + (extensionByteIndex + 8) + " esize: " + esize);
-            console.log(edata);
             let extension = new nifti_extension_1.NIFTIEXTENSION(esize, ecode, edata, extensionLittleEndian);
             extensions.push(extension);
             extensionByteIndex += esize;
@@ -2368,7 +2370,7 @@
       __publicField(Utils, "GUNZIP_MAGIC_COOKIE1", 31);
       __publicField(Utils, "GUNZIP_MAGIC_COOKIE2", 139);
       __publicField(Utils, "getByteAt", function(data, start) {
-        return data.getInt8(start);
+        return data.getUint8(start);
       });
       __publicField(Utils, "getShortAt", function(data, start, littleEndian) {
         return data.getInt16(start, littleEndian);
@@ -3065,8 +3067,8 @@
           view.setFloat32(128, this.cal_min, this.littleEndian);
           view.setFloat32(132, this.slice_duration, this.littleEndian);
           view.setFloat32(136, this.toffset, this.littleEndian);
-          byteArray.set(Buffer.from(this.description), 148);
-          byteArray.set(Buffer.from(this.aux_file), 228);
+          byteArray.set(new TextEncoder().encode(this.description), 148);
+          byteArray.set(new TextEncoder().encode(this.aux_file), 228);
           view.setInt16(252, this.qform_code, this.littleEndian);
           view.setInt16(254, this.sform_code, this.littleEndian);
           view.setFloat32(256, this.quatern_b, this.littleEndian);
@@ -3079,8 +3081,8 @@
           for (let i = 0; i < 12; i++) {
             view.setFloat32(280 + FLOAT32_SIZE * i, flattened[i], this.littleEndian);
           }
-          byteArray.set(Buffer.from(this.intent_name), 328);
-          byteArray.set(Buffer.from(this.magic), 344);
+          byteArray.set(new TextEncoder().encode(this.intent_name), 328);
+          byteArray.set(new TextEncoder().encode(this.magic), 344);
           if (includeExtensions) {
             byteArray.set(Uint8Array.from([1, 0, 0, 0]), 348);
             let extensionByteIndex = this.getExtensionLocation();
@@ -3220,7 +3222,7 @@
           this.numBitsPerVoxel = utilities_1.Utils.getShortAt(rawData, 14, this.littleEndian);
           for (ctr = 0; ctr < 8; ctr += 1) {
             index = 16 + ctr * 8;
-            this.dims[ctr] = utilities_1.Utils.getLongAt(rawData, index, this.littleEndian);
+            this.dims[ctr] = utilities_1.Utils.getInt64At(rawData, index, this.littleEndian);
           }
           this.intent_p1 = utilities_1.Utils.getDoubleAt(rawData, 80, this.littleEndian);
           this.intent_p2 = utilities_1.Utils.getDoubleAt(rawData, 88, this.littleEndian);
@@ -3229,15 +3231,15 @@
             index = 104 + ctr * 8;
             this.pixDims[ctr] = utilities_1.Utils.getDoubleAt(rawData, index, this.littleEndian);
           }
-          this.vox_offset = utilities_1.Utils.getLongAt(rawData, 168, this.littleEndian);
+          this.vox_offset = utilities_1.Utils.getInt64At(rawData, 168, this.littleEndian);
           this.scl_slope = utilities_1.Utils.getDoubleAt(rawData, 176, this.littleEndian);
           this.scl_inter = utilities_1.Utils.getDoubleAt(rawData, 184, this.littleEndian);
           this.cal_max = utilities_1.Utils.getDoubleAt(rawData, 192, this.littleEndian);
           this.cal_min = utilities_1.Utils.getDoubleAt(rawData, 200, this.littleEndian);
           this.slice_duration = utilities_1.Utils.getDoubleAt(rawData, 208, this.littleEndian);
           this.toffset = utilities_1.Utils.getDoubleAt(rawData, 216, this.littleEndian);
-          this.slice_start = utilities_1.Utils.getLongAt(rawData, 224, this.littleEndian);
-          this.slice_end = utilities_1.Utils.getLongAt(rawData, 232, this.littleEndian);
+          this.slice_start = utilities_1.Utils.getInt64At(rawData, 224, this.littleEndian);
+          this.slice_end = utilities_1.Utils.getInt64At(rawData, 232, this.littleEndian);
           this.description = utilities_1.Utils.getStringAt(rawData, 240, 240 + 80);
           this.aux_file = utilities_1.Utils.getStringAt(rawData, 320, 320 + 24);
           this.qform_code = utilities_1.Utils.getIntAt(rawData, 344, this.littleEndian);
@@ -3402,7 +3404,7 @@
           let byteArray = new Uint8Array(byteSize);
           let view = new DataView(byteArray.buffer);
           view.setInt32(0, 540, this.littleEndian);
-          byteArray.set(Buffer.from(this.magic), 4);
+          byteArray.set(new TextEncoder().encode(this.magic), 4);
           view.setInt16(12, this.datatypeCode, this.littleEndian);
           view.setInt16(14, this.numBitsPerVoxel, this.littleEndian);
           for (let i = 0; i < 8; i++) {
@@ -3423,8 +3425,8 @@
           view.setFloat64(216, this.toffset, this.littleEndian);
           view.setBigInt64(224, BigInt(this.slice_start), this.littleEndian);
           view.setBigInt64(232, BigInt(this.slice_end), this.littleEndian);
-          byteArray.set(Buffer.from(this.description), 240);
-          byteArray.set(Buffer.from(this.aux_file), 320);
+          byteArray.set(new TextEncoder().encode(this.description), 240);
+          byteArray.set(new TextEncoder().encode(this.aux_file), 320);
           view.setInt32(344, this.qform_code, this.littleEndian);
           view.setInt32(348, this.sform_code, this.littleEndian);
           view.setFloat64(352, this.quatern_b, this.littleEndian);
@@ -3440,7 +3442,7 @@
           view.setInt32(496, this.slice_code, this.littleEndian);
           view.setInt32(500, this.xyzt_units, this.littleEndian);
           view.setInt32(504, this.intent_code, this.littleEndian);
-          byteArray.set(Buffer.from(this.intent_name), 508);
+          byteArray.set(new TextEncoder().encode(this.intent_name), 508);
           view.setUint8(524, this.dim_info);
           if (includeExtensions) {
             byteArray.set(Uint8Array.from([1, 0, 0, 0]), 540);
@@ -3609,7 +3611,7 @@
         if (header) {
           header.readHeader(data);
         } else {
-          console.error("That file does not appear to be NIFTI!");
+          throw new Error("That file does not appear to be NIFTI!");
         }
         return header;
       }
