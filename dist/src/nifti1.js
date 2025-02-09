@@ -1,52 +1,49 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.NIFTI1 = void 0;
-const utilities_1 = require("./utilities");
+import { Utils } from "./utilities.js";
 /*** Constructor ***/
 /**
-   * The NIFTI1 constructor.
-   * @constructor
-   * @property {boolean} littleEndian
-   * @property {number} dim_info
-   * @property {number[]} dims - image dimensions
-   * @property {number} intent_p1
-   * @property {number} intent_p2
-   * @property {number} intent_p3
-   * @property {number} intent_code
-   * @property {number} datatypeCode
-   * @property {number} numBitsPerVoxel
-   * @property {number} slice_start
-   * @property {number} slice_end
-   * @property {number} slice_code
-   * @property {number[]} pixDims - voxel dimensions
-   * @property {number} vox_offset
-   * @property {number} scl_slope
-   * @property {number} scl_inter
-   * @property {number} xyzt_units
-   * @property {number} cal_max
-   * @property {number} cal_min
-   * @property {number} slice_duration
-   * @property {number} toffset
-   * @property {string} description
-   * @property {string} aux_file
-   * @property {string} intent_name
-   * @property {number} qform_code
-   * @property {number} sform_code
-   * @property {number} quatern_b
-   * @property {number} quatern_c
-   * @property {number} quatern_d
-   * @property {number} quatern_x
-   * @property {number} quatern_y
-   * @property {number} quatern_z
-   * @property {Array.<Array.<number>>} affine
-   * @property {string} magic
-   * @property {boolean} isHDR - if hdr/img format
-   * @property {number[]} extensionFlag
-   * @property {number} extensionSize
-   * @property {number} extensionCode
-   * @property {nifti.NIFTIEXTENSION[]} extensions
-   * @type {Function}
-   */
+ * The NIFTI1 constructor.
+ * @constructor
+ * @property {boolean} littleEndian
+ * @property {number} dim_info
+ * @property {number[]} dims - image dimensions
+ * @property {number} intent_p1
+ * @property {number} intent_p2
+ * @property {number} intent_p3
+ * @property {number} intent_code
+ * @property {number} datatypeCode
+ * @property {number} numBitsPerVoxel
+ * @property {number} slice_start
+ * @property {number} slice_end
+ * @property {number} slice_code
+ * @property {number[]} pixDims - voxel dimensions
+ * @property {number} vox_offset
+ * @property {number} scl_slope
+ * @property {number} scl_inter
+ * @property {number} xyzt_units
+ * @property {number} cal_max
+ * @property {number} cal_min
+ * @property {number} slice_duration
+ * @property {number} toffset
+ * @property {string} description
+ * @property {string} aux_file
+ * @property {string} intent_name
+ * @property {number} qform_code
+ * @property {number} sform_code
+ * @property {number} quatern_b
+ * @property {number} quatern_c
+ * @property {number} quatern_d
+ * @property {number} quatern_x
+ * @property {number} quatern_y
+ * @property {number} quatern_z
+ * @property {Array.<Array.<number>>} affine
+ * @property {string} magic
+ * @property {boolean} isHDR - if hdr/img format
+ * @property {number[]} extensionFlag
+ * @property {number} extensionSize
+ * @property {number} extensionCode
+ * @property {nifti.NIFTIEXTENSION[]} extensions
+ * @type {Function}
+ */
 class NIFTI1 {
     littleEndian = false;
     dim_info = 0;
@@ -146,48 +143,48 @@ class NIFTI1 {
      * @param {ArrayBuffer} data
      */
     readHeader(data) {
-        var rawData = new DataView(data), magicCookieVal = utilities_1.Utils.getIntAt(rawData, 0, this.littleEndian), ctr, ctrOut, ctrIn, index;
+        var rawData = new DataView(data), magicCookieVal = Utils.getIntAt(rawData, 0, this.littleEndian), ctr, ctrOut, ctrIn, index;
         if (magicCookieVal !== NIFTI1.MAGIC_COOKIE) {
             // try as little endian
             this.littleEndian = true;
-            magicCookieVal = utilities_1.Utils.getIntAt(rawData, 0, this.littleEndian);
+            magicCookieVal = Utils.getIntAt(rawData, 0, this.littleEndian);
         }
         if (magicCookieVal !== NIFTI1.MAGIC_COOKIE) {
             throw new Error("This does not appear to be a NIFTI file!");
         }
-        this.dim_info = utilities_1.Utils.getByteAt(rawData, 39);
+        this.dim_info = Utils.getByteAt(rawData, 39);
         for (ctr = 0; ctr < 8; ctr += 1) {
             index = 40 + ctr * 2;
-            this.dims[ctr] = utilities_1.Utils.getShortAt(rawData, index, this.littleEndian);
+            this.dims[ctr] = Utils.getShortAt(rawData, index, this.littleEndian);
         }
-        this.intent_p1 = utilities_1.Utils.getFloatAt(rawData, 56, this.littleEndian);
-        this.intent_p2 = utilities_1.Utils.getFloatAt(rawData, 60, this.littleEndian);
-        this.intent_p3 = utilities_1.Utils.getFloatAt(rawData, 64, this.littleEndian);
-        this.intent_code = utilities_1.Utils.getShortAt(rawData, 68, this.littleEndian);
-        this.datatypeCode = utilities_1.Utils.getShortAt(rawData, 70, this.littleEndian);
-        this.numBitsPerVoxel = utilities_1.Utils.getShortAt(rawData, 72, this.littleEndian);
-        this.slice_start = utilities_1.Utils.getShortAt(rawData, 74, this.littleEndian);
+        this.intent_p1 = Utils.getFloatAt(rawData, 56, this.littleEndian);
+        this.intent_p2 = Utils.getFloatAt(rawData, 60, this.littleEndian);
+        this.intent_p3 = Utils.getFloatAt(rawData, 64, this.littleEndian);
+        this.intent_code = Utils.getShortAt(rawData, 68, this.littleEndian);
+        this.datatypeCode = Utils.getShortAt(rawData, 70, this.littleEndian);
+        this.numBitsPerVoxel = Utils.getShortAt(rawData, 72, this.littleEndian);
+        this.slice_start = Utils.getShortAt(rawData, 74, this.littleEndian);
         for (ctr = 0; ctr < 8; ctr += 1) {
             index = 76 + ctr * 4;
-            this.pixDims[ctr] = utilities_1.Utils.getFloatAt(rawData, index, this.littleEndian);
+            this.pixDims[ctr] = Utils.getFloatAt(rawData, index, this.littleEndian);
         }
-        this.vox_offset = utilities_1.Utils.getFloatAt(rawData, 108, this.littleEndian);
-        this.scl_slope = utilities_1.Utils.getFloatAt(rawData, 112, this.littleEndian);
-        this.scl_inter = utilities_1.Utils.getFloatAt(rawData, 116, this.littleEndian);
-        this.slice_end = utilities_1.Utils.getShortAt(rawData, 120, this.littleEndian);
-        this.slice_code = utilities_1.Utils.getByteAt(rawData, 122);
-        this.xyzt_units = utilities_1.Utils.getByteAt(rawData, 123);
-        this.cal_max = utilities_1.Utils.getFloatAt(rawData, 124, this.littleEndian);
-        this.cal_min = utilities_1.Utils.getFloatAt(rawData, 128, this.littleEndian);
-        this.slice_duration = utilities_1.Utils.getFloatAt(rawData, 132, this.littleEndian);
-        this.toffset = utilities_1.Utils.getFloatAt(rawData, 136, this.littleEndian);
-        this.description = utilities_1.Utils.getStringAt(rawData, 148, 228);
-        this.aux_file = utilities_1.Utils.getStringAt(rawData, 228, 252);
-        this.qform_code = utilities_1.Utils.getShortAt(rawData, 252, this.littleEndian);
-        this.sform_code = utilities_1.Utils.getShortAt(rawData, 254, this.littleEndian);
-        this.quatern_b = utilities_1.Utils.getFloatAt(rawData, 256, this.littleEndian);
-        this.quatern_c = utilities_1.Utils.getFloatAt(rawData, 260, this.littleEndian);
-        this.quatern_d = utilities_1.Utils.getFloatAt(rawData, 264, this.littleEndian);
+        this.vox_offset = Utils.getFloatAt(rawData, 108, this.littleEndian);
+        this.scl_slope = Utils.getFloatAt(rawData, 112, this.littleEndian);
+        this.scl_inter = Utils.getFloatAt(rawData, 116, this.littleEndian);
+        this.slice_end = Utils.getShortAt(rawData, 120, this.littleEndian);
+        this.slice_code = Utils.getByteAt(rawData, 122);
+        this.xyzt_units = Utils.getByteAt(rawData, 123);
+        this.cal_max = Utils.getFloatAt(rawData, 124, this.littleEndian);
+        this.cal_min = Utils.getFloatAt(rawData, 128, this.littleEndian);
+        this.slice_duration = Utils.getFloatAt(rawData, 132, this.littleEndian);
+        this.toffset = Utils.getFloatAt(rawData, 136, this.littleEndian);
+        this.description = Utils.getStringAt(rawData, 148, 228);
+        this.aux_file = Utils.getStringAt(rawData, 228, 252);
+        this.qform_code = Utils.getShortAt(rawData, 252, this.littleEndian);
+        this.sform_code = Utils.getShortAt(rawData, 254, this.littleEndian);
+        this.quatern_b = Utils.getFloatAt(rawData, 256, this.littleEndian);
+        this.quatern_c = Utils.getFloatAt(rawData, 260, this.littleEndian);
+        this.quatern_d = Utils.getFloatAt(rawData, 264, this.littleEndian);
         // Added by znshje on 27/11/2021
         //
         // quatern_a is a parameter in quaternion [a, b, c, d], which is required in affine calculation (METHOD 2)
@@ -197,19 +194,19 @@ class NIFTI1 {
             (Math.pow(this.quatern_b, 2) +
                 Math.pow(this.quatern_c, 2) +
                 Math.pow(this.quatern_d, 2)));
-        this.qoffset_x = utilities_1.Utils.getFloatAt(rawData, 268, this.littleEndian);
-        this.qoffset_y = utilities_1.Utils.getFloatAt(rawData, 272, this.littleEndian);
-        this.qoffset_z = utilities_1.Utils.getFloatAt(rawData, 276, this.littleEndian);
+        this.qoffset_x = Utils.getFloatAt(rawData, 268, this.littleEndian);
+        this.qoffset_y = Utils.getFloatAt(rawData, 272, this.littleEndian);
+        this.qoffset_z = Utils.getFloatAt(rawData, 276, this.littleEndian);
         // Added by znshje on 27/11/2021
         //
         /* See: https://nifti.nimh.nih.gov/pub/dist/src/niftilib/nifti1.h */
-        if ((this.qform_code < 1) && (this.sform_code < 1)) {
+        if (this.qform_code < 1 && this.sform_code < 1) {
             // METHOD 0 (used when both SFORM and QFORM are unknown)
             this.affine[0][0] = this.pixDims[1];
             this.affine[1][1] = this.pixDims[2];
             this.affine[2][2] = this.pixDims[3];
         }
-        if ((this.qform_code > 0) && (this.sform_code < this.qform_code)) {
+        if (this.qform_code > 0 && this.sform_code < this.qform_code) {
             //   METHOD 2 (used when qform_code > 0, which should be the "normal" case):
             //    ---------------------------------------------------------------------
             //    The (x,y,z) coordinates are given by the pixdim[] scales, a rotation
@@ -309,7 +306,7 @@ class NIFTI1 {
             for (ctrOut = 0; ctrOut < 3; ctrOut += 1) {
                 for (ctrIn = 0; ctrIn < 4; ctrIn += 1) {
                     index = 280 + (ctrOut * 4 + ctrIn) * 4;
-                    this.affine[ctrOut][ctrIn] = utilities_1.Utils.getFloatAt(rawData, index, this.littleEndian);
+                    this.affine[ctrOut][ctrIn] = Utils.getFloatAt(rawData, index, this.littleEndian);
                 }
             }
         }
@@ -317,22 +314,23 @@ class NIFTI1 {
         this.affine[3][1] = 0;
         this.affine[3][2] = 0;
         this.affine[3][3] = 1;
-        this.intent_name = utilities_1.Utils.getStringAt(rawData, 328, 344);
-        this.magic = utilities_1.Utils.getStringAt(rawData, 344, 348);
-        this.isHDR = this.magic === String.fromCharCode.apply(null, NIFTI1.MAGIC_NUMBER2);
+        this.intent_name = Utils.getStringAt(rawData, 328, 344);
+        this.magic = Utils.getStringAt(rawData, 344, 348);
+        this.isHDR =
+            this.magic === String.fromCharCode.apply(null, NIFTI1.MAGIC_NUMBER2);
         if (rawData.byteLength > NIFTI1.MAGIC_COOKIE) {
-            this.extensionFlag[0] = utilities_1.Utils.getByteAt(rawData, 348);
-            this.extensionFlag[1] = utilities_1.Utils.getByteAt(rawData, 348 + 1);
-            this.extensionFlag[2] = utilities_1.Utils.getByteAt(rawData, 348 + 2);
-            this.extensionFlag[3] = utilities_1.Utils.getByteAt(rawData, 348 + 3);
+            this.extensionFlag[0] = Utils.getByteAt(rawData, 348);
+            this.extensionFlag[1] = Utils.getByteAt(rawData, 348 + 1);
+            this.extensionFlag[2] = Utils.getByteAt(rawData, 348 + 2);
+            this.extensionFlag[3] = Utils.getByteAt(rawData, 348 + 3);
             let isExtensionCapable = true;
-            if ((!this.isHDR) && (this.vox_offset <= 352))
+            if (!this.isHDR && this.vox_offset <= 352)
                 isExtensionCapable = false;
-            if (rawData.byteLength <= (352 + 16))
+            if (rawData.byteLength <= 352 + 16)
                 isExtensionCapable = false;
             if (isExtensionCapable && this.extensionFlag[0]) {
                 // read our extensions
-                this.extensions = utilities_1.Utils.getExtensionsAt(rawData, this.getExtensionLocation(), this.littleEndian, this.vox_offset);
+                this.extensions = Utils.getExtensionsAt(rawData, this.getExtensionLocation(), this.littleEndian, this.vox_offset);
                 // set the extensionSize and extensionCode from the first extension found
                 this.extensionSize = this.extensions[0].esize;
                 this.extensionCode = this.extensions[0].ecode;
@@ -344,7 +342,7 @@ class NIFTI1 {
      * @returns {string}
      */
     toFormattedString() {
-        var fmt = utilities_1.Utils.formatNumber, string = "";
+        var fmt = Utils.formatNumber, string = "";
         string += "Dim Info = " + this.dim_info + "\n";
         string +=
             "Image Dimensions (1-8): " +
@@ -792,10 +790,10 @@ class NIFTI1 {
             return null;
         }
         /* Build and test all possible +1/-1 coordinate permutation matrices P;
-       then find the P such that the rotation matrix M=PQ is closest to the
-       identity, in the sense of M having the smallest total rotation angle. */
+         then find the P such that the rotation matrix M=PQ is closest to the
+         identity, in the sense of M having the smallest total rotation angle. */
         /* Despite the formidable looking 6 nested loops, there are
-       only 3*3*3*2*2*2 = 216 passes, which will run very quickly. */
+         only 3*3*3*2*2*2 = 216 passes, which will run very quickly. */
         vbest = -666.0;
         ibest = pbest = qbest = rbest = 1;
         jbest = 2;
@@ -826,8 +824,7 @@ class NIFTI1 {
                                         P[0][i - 1] = p;
                                         P[1][j - 1] = q;
                                         P[2][k - 1] = r;
-                                        detP =
-                                            this.nifti_mat33_determ(P); /* sign of permutation */
+                                        detP = this.nifti_mat33_determ(P); /* sign of permutation */
                                         if (detP * detQ > 0.0) {
                                             M = this.nifti_mat33_mul(P, Q);
                                             /* angle of M rotation = 2.0*acos(0.5*sqrt(1.0+trace(M)))       */
@@ -852,18 +849,18 @@ class NIFTI1 {
             }
         }
         /* At this point ibest is 1 or 2 or 3; pbest is -1 or +1; etc.
-  
-       The matrix P that corresponds is the best permutation approximation
-       to Q-inverse; that is, P (approximately) takes (x,y,z) coordinates
-       to the (i,j,k) axes.
-  
-       For example, the first row of P (which contains pbest in column ibest)
-       determines the way the i axis points relative to the anatomical
-       (x,y,z) axes.  If ibest is 2, then the i axis is along the y axis,
-       which is direction P2A (if pbest > 0) or A2P (if pbest < 0).
-  
-       So, using ibest and pbest, we can assign the output code for
-       the i axis.  Mutatis mutandis for the j and k axes, of course. */
+    
+         The matrix P that corresponds is the best permutation approximation
+         to Q-inverse; that is, P (approximately) takes (x,y,z) coordinates
+         to the (i,j,k) axes.
+    
+         For example, the first row of P (which contains pbest in column ibest)
+         determines the way the i axis points relative to the anatomical
+         (x,y,z) axes.  If ibest is 2, then the i axis is along the y axis,
+         which is direction P2A (if pbest > 0) or A2P (if pbest < 0).
+    
+         So, using ibest and pbest, we can assign the output code for
+         the i axis.  Mutatis mutandis for the j and k axes, of course. */
         iChar = jChar = kChar = iSense = jSense = kSense = "";
         switch (ibest * pbest) {
             case 1 /*i = NIFTI_L2R*/:
@@ -990,7 +987,7 @@ class NIFTI1 {
      * @returns {number}
      */
     getExtensionSize(data) {
-        return utilities_1.Utils.getIntAt(data, this.getExtensionLocation(), this.littleEndian);
+        return Utils.getIntAt(data, this.getExtensionLocation(), this.littleEndian);
     }
     /**
      * Returns the extension code.
@@ -998,7 +995,7 @@ class NIFTI1 {
      * @returns {number}
      */
     getExtensionCode(data) {
-        return utilities_1.Utils.getIntAt(data, this.getExtensionLocation() + 4, this.littleEndian);
+        return Utils.getIntAt(data, this.getExtensionLocation() + 4, this.littleEndian);
     }
     /**
      * Adds an extension
@@ -1117,5 +1114,5 @@ class NIFTI1 {
         return byteArray.buffer;
     }
 }
-exports.NIFTI1 = NIFTI1;
+export { NIFTI1 };
 //# sourceMappingURL=nifti1.js.map

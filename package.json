@@ -2,11 +2,14 @@
   "name": "nifti-reader-js",
   "version": "0.7.0",
   "description": "A JavaScript NIfTI file format reader.",
-  "main": "dist/src/nifti.js",
-  "types": "dist/src/nifti.d.ts",
-  "directories": {
-    "test": "tests"
+  "main": "./dist/src/nifti.js",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./dist/src/nifti.js"
+    }
   },
+  "types": "dist/src/nifti.d.ts",
   "files": [
     "release/current/*.js",
     "dist/src/*.js",
@@ -18,26 +21,18 @@
     "src/*.js.map",
     "src/*.ts"
   ],
-  "dependencies": {
-    "fflate": "*"
-  },
   "devDependencies": {
-    "@types/chai": "^4.3.5",
-    "@types/mocha": "^10.0.1",
-    "chai": "^4.3.7",
     "esbuild": "*",
     "jsdoc-to-markdown": "*",
-    "mocha": "*",
-    "ts-node": "^10.9.1",
+    "prettier": "^3.5.0",
     "tsify": "^5.0.4",
-    "typescript": "^5.0.4"
+    "typescript": "^5.0.4",
+    "vitest": "^3.0.5"
   },
   "scripts": {
-    "test": "mocha -r ts-node/register __tests__/**/*.spec.ts",
-    "test-js": "npm run build; npm run release; mocha --timeout 0 tests",
-    "build": "rm -rf build; mkdir build; tsc; esbuild dist/src/nifti.js --bundle --outfile=build/nifti-reader.js; esbuild dist/src/nifti.js --bundle --minify --outfile=build/nifti-reader-min.js",
-    "release": "npm run build; rm release/current/*.js; cp build/*.js release/current/.",
-    "doc": "rm -rf build; mkdir build; ./node_modules/.bin/jsdoc2md dist/src/*.js > build/docs.md"
+    "test": "vitest run __tests__/",
+    "build": "rm -rf build && mkdir build && tsc && esbuild dist/src/nifti.js --bundle --outfile=build/nifti-reader.js && esbuild dist/src/nifti.js --bundle --minify --outfile=build/nifti-reader-min.js",
+    "doc": "rm -rf build && mkdir build && ./node_modules/.bin/jsdoc2md dist/src/*.js > build/docs.md"
   },
   "repository": {
     "type": "git",
@@ -52,5 +47,8 @@
   "bugs": {
     "url": "https://github.com/rii-mango/NIFTI-Reader-JS/issues"
   },
-  "homepage": "https://github.com/rii-mango/NIFTI-Reader-JS"
+  "homepage": "https://github.com/rii-mango/NIFTI-Reader-JS",
+  "dependencies": {
+    "fflate": "^0.8.2"
+  }
 }

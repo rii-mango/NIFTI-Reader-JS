@@ -1,7 +1,4 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.Utils = void 0;
-const nifti_extension_1 = require("./nifti-extension");
+import { NIFTIEXTENSION } from "./nifti-extension.js";
 class Utils {
     /*** Static Pseudo-constants ***/
     static crcTable = null;
@@ -75,7 +72,7 @@ class Utils {
             }
             let ecode = Utils.getIntAt(data, extensionByteIndex + 4, extensionLittleEndian);
             let edata = data.buffer.slice(extensionByteIndex + 8, extensionByteIndex + esize);
-            let extension = new nifti_extension_1.NIFTIEXTENSION(esize, ecode, edata, extensionLittleEndian);
+            let extension = new NIFTIEXTENSION(esize, ecode, edata, extensionLittleEndian);
             extensions.push(extension);
             extensionByteIndex += esize;
         }
@@ -134,5 +131,5 @@ class Utils {
         return (crc ^ -1) >>> 0;
     }
 }
-exports.Utils = Utils;
+export { Utils };
 //# sourceMappingURL=utilities.js.map

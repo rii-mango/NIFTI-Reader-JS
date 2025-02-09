@@ -1,6 +1,3 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.NIFTIEXTENSION = void 0;
 /*** Constructor ***/
 /**
  * The NIFTIEXTENSION constructor.
@@ -11,7 +8,7 @@ exports.NIFTIEXTENSION = void 0;
  * @property {boolean} littleEndian - is little endian
  * @type {Function}
  */
-class NIFTIEXTENSION {
+export class NIFTIEXTENSION {
     esize;
     ecode;
     edata;
@@ -40,5 +37,4 @@ class NIFTIEXTENSION {
         return byteArray.buffer;
     }
 }
-exports.NIFTIEXTENSION = NIFTIEXTENSION;
 //# sourceMappingURL=nifti-extension.js.map

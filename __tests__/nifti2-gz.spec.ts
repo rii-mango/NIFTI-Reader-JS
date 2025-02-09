@@ -1,90 +1,81 @@
-import {
-  isCompressed,
-  readHeader,
-  readImage,
-  decompress,
-  isNIFTI2,
-  isNIFTI1,
-} from "../src/nifti";
-import { NIFTI1 } from "../src/nifti1";
-import { assert, expect } from "chai";
-import * as fs from "fs";
-import { Utils } from "../src/utilities";
-import { NIFTI2 } from "../src/nifti2";
+import { isCompressed, readHeader, readImage, decompress, isNIFTI2, isNIFTI1 } from '../src/nifti.js'
+import { NIFTI1 } from '../src/nifti1.js'
+import * as fs from 'fs'
+import { Utils } from '../src/utilities.js'
+import { NIFTI2 } from '../src/nifti2.js'
+import { describe, it, assert, expect } from 'vitest'
 
 function parseJSONFromBytes(bytes: Uint8Array): any {
-  const decoder = new TextDecoder();
-  const jsonString = decoder.decode(bytes);
-  return JSON.parse(jsonString);
+  const decoder = new TextDecoder()
+  const jsonString = decoder.decode(bytes)
+  return JSON.parse(jsonString)
 }
 
-const buf = fs.readFileSync("./data/avg152T1_LR_nifti2.nii.gz");
-let data = Utils.toArrayBuffer(buf);
-let nifti2: NIFTI1 | NIFTI2 | null;
-var bytes = null;
-var clone = null;
+const buf = fs.readFileSync('./data/avg152T1_LR_nifti2.nii.gz')
+let data = Utils.toArrayBuffer(buf)
+let nifti2: NIFTI1 | NIFTI2 | null
+var bytes: null | ArrayBufferLike = null
+var clone: null | NIFTI1 | NIFTI2 = null
 
-describe("NIFTI-Reader-JS", function () {
-  describe("compressed nifti-2 test", function () {
-    it("isCompressed() should return true", function () {
-      assert.equal(true, isCompressed(data));
-    });
+describe('NIFTI-Reader-JS', function () {
+  describe('compressed nifti-2 test', function () {
+    it('isCompressed() should return true', function () {
+      assert.equal(true, isCompressed(data))
+    })
 
-    it("should not throw error when decompressing", function (done) {
+    it('should not throw error when decompressing', function (done) {
       assert.doesNotThrow(function () {
-        data = decompress(data);
-        done();
-      });
-    });
+        data = decompress(data)
+      })
+    })
 
-    it("isNIFTI1() should return false", function () {
-      assert.equal(false, isNIFTI1(data));
-    });
+    it('isNIFTI1() should return false', function () {
+      assert.equal(false, isNIFTI1(data))
+    })
 
-    it("isNIFTI2() should return true", function () {
-      assert.equal(true, isNIFTI2(data));
-    });
+    it('isNIFTI2() should return true', function () {
+      assert.equal(true, isNIFTI2(data))
+    })
 
-    it("should not throw error when reading header", function (done) {
+    it('should not throw error when reading header', function (done) {
       assert.doesNotThrow(function () {
-        nifti2 = readHeader(data);
-        done();
-      });
-    });
+        nifti2 = readHeader(data)
+      })
+    })
 
-    it("dims[1] should be 91", function () {
-      assert.equal(91, nifti2!.dims[1]);
-    });
+    it('dims[1] should be 91', function () {
+      assert.equal(91, nifti2!.dims[1])
+    })
 
-    it("dims[2] should be 109", function () {
-      assert.equal(109, nifti2!.dims[2]);
-    });
+    it('dims[2] should be 109', function () {
+      assert.equal(109, nifti2!.dims[2])
+    })
 
-    it("dims[3] should be 91", function () {
-      assert.equal(91, nifti2!.dims[3]);
-    });
+    it('dims[3] should be 91', function () {
+      assert.equal(91, nifti2!.dims[3])
+    })
 
-    it("image data checksum should equal 471047545", function () {
-      var imageData = readImage(nifti2!, data);
-      var checksum = Utils.crc32(new DataView(imageData));
-      assert.equal(checksum, 471047545);
-    });
+    it('image data checksum should equal 471047545', function () {
+      var imageData = readImage(nifti2!, data)
+      var checksum = Utils.crc32(new DataView(imageData))
+      assert.equal(checksum, 471047545)
+    })
 
-    it("data returned from toArrayBuffer preserves all nifti-2 properties", function () {
-      bytes = nifti2!.toArrayBuffer();
-      clone = readHeader(bytes);
-      let niftiHeaderText = JSON.stringify(nifti2);
-      let cloneText = JSON.stringify(clone);
-      expect(cloneText).to.equal(niftiHeaderText);
-    });
+    it('data returned from toArrayBuffer preserves all nifti-2 properties', function () {
+      bytes = nifti2!.toArrayBuffer()
+      clone = readHeader(bytes)
+      let niftiHeaderText = JSON.stringify(nifti2)
+      let cloneText = JSON.stringify(clone)
+      expect(cloneText).to.equal(niftiHeaderText)
+    })
 
-    it("description, aux_file, intent_name and magic are preserved", function() {
-      bytes = nifti2!.toArrayBuffer();
-      clone = readHeader(bytes); 
-      expect(clone!.description).to.equal(nifti2!.description);
-      expect(clone!.aux_file).to.equal(nifti2!.aux_file);
-      expect(clone!.intent_name).to.equal(nifti2!.intent_name);
-      expect(clone!.magic).to.equal(nifti2!.magic);
-    });
-  });
-});
+    it('description, aux_file, intent_name and magic are preserved', function () {
+      bytes = nifti2!.toArrayBuffer()
+      clone = readHeader(bytes)
+      expect(clone!.description).to.equal(nifti2!.description)
+      expect(clone!.aux_file).to.equal(nifti2!.aux_file)
+      expect(clone!.intent_name).to.equal(nifti2!.intent_name)
+      expect(clone!.magic).to.equal(nifti2!.magic)
+    })
+  })
+})
