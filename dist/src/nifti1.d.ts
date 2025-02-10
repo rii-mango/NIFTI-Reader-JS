@@ -1,49 +1,49 @@
-import { NIFTIEXTENSION } from "./nifti-extension";
+import { NIFTIEXTENSION } from "./nifti-extension.js";
 /*** Constructor ***/
 /**
-   * The NIFTI1 constructor.
-   * @constructor
-   * @property {boolean} littleEndian
-   * @property {number} dim_info
-   * @property {number[]} dims - image dimensions
-   * @property {number} intent_p1
-   * @property {number} intent_p2
-   * @property {number} intent_p3
-   * @property {number} intent_code
-   * @property {number} datatypeCode
-   * @property {number} numBitsPerVoxel
-   * @property {number} slice_start
-   * @property {number} slice_end
-   * @property {number} slice_code
-   * @property {number[]} pixDims - voxel dimensions
-   * @property {number} vox_offset
-   * @property {number} scl_slope
-   * @property {number} scl_inter
-   * @property {number} xyzt_units
-   * @property {number} cal_max
-   * @property {number} cal_min
-   * @property {number} slice_duration
-   * @property {number} toffset
-   * @property {string} description
-   * @property {string} aux_file
-   * @property {string} intent_name
-   * @property {number} qform_code
-   * @property {number} sform_code
-   * @property {number} quatern_b
-   * @property {number} quatern_c
-   * @property {number} quatern_d
-   * @property {number} quatern_x
-   * @property {number} quatern_y
-   * @property {number} quatern_z
-   * @property {Array.<Array.<number>>} affine
-   * @property {string} magic
-   * @property {boolean} isHDR - if hdr/img format
-   * @property {number[]} extensionFlag
-   * @property {number} extensionSize
-   * @property {number} extensionCode
-   * @property {nifti.NIFTIEXTENSION[]} extensions
-   * @type {Function}
-   */
+ * The NIFTI1 constructor.
+ * @constructor
+ * @property {boolean} littleEndian
+ * @property {number} dim_info
+ * @property {number[]} dims - image dimensions
+ * @property {number} intent_p1
+ * @property {number} intent_p2
+ * @property {number} intent_p3
+ * @property {number} intent_code
+ * @property {number} datatypeCode
+ * @property {number} numBitsPerVoxel
+ * @property {number} slice_start
+ * @property {number} slice_end
+ * @property {number} slice_code
+ * @property {number[]} pixDims - voxel dimensions
+ * @property {number} vox_offset
+ * @property {number} scl_slope
+ * @property {number} scl_inter
+ * @property {number} xyzt_units
+ * @property {number} cal_max
+ * @property {number} cal_min
+ * @property {number} slice_duration
+ * @property {number} toffset
+ * @property {string} description
+ * @property {string} aux_file
+ * @property {string} intent_name
+ * @property {number} qform_code
+ * @property {number} sform_code
+ * @property {number} quatern_b
+ * @property {number} quatern_c
+ * @property {number} quatern_d
+ * @property {number} quatern_x
+ * @property {number} quatern_y
+ * @property {number} quatern_z
+ * @property {Array.<Array.<number>>} affine
+ * @property {string} magic
+ * @property {boolean} isHDR - if hdr/img format
+ * @property {number[]} extensionFlag
+ * @property {number} extensionSize
+ * @property {number} extensionCode
+ * @property {nifti.NIFTIEXTENSION[]} extensions
+ * @type {Function}
+ */
 export declare class NIFTI1 {
     littleEndian: boolean;
     dim_info: number;

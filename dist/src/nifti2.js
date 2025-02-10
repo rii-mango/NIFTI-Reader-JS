@@ -1,8 +1,5 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.NIFTI2 = void 0;
-const nifti1_1 = require("./nifti1");
-const utilities_1 = require("./utilities");
+import { NIFTI1 } from "./nifti1.js";
+import { Utils } from "./utilities.js";
 /**
  * The NIFTI2 constructor.
  * @constructor
@@ -103,71 +100,71 @@ class NIFTI2 {
      * @param {ArrayBuffer} data
      */
     readHeader(data) {
-        var rawData = new DataView(data), magicCookieVal = utilities_1.Utils.getIntAt(rawData, 0, this.littleEndian), ctr, ctrOut, ctrIn, index, array;
+        var rawData = new DataView(data), magicCookieVal = Utils.getIntAt(rawData, 0, this.littleEndian), ctr, ctrOut, ctrIn, index, array;
         if (magicCookieVal !== NIFTI2.MAGIC_COOKIE) {
             // try as little endian
             this.littleEndian = true;
-            magicCookieVal = utilities_1.Utils.getIntAt(rawData, 0, this.littleEndian);
+            magicCookieVal = Utils.getIntAt(rawData, 0, this.littleEndian);
         }
         if (magicCookieVal !== NIFTI2.MAGIC_COOKIE) {
             throw new Error("This does not appear to be a NIFTI file!");
         }
-        this.magic = utilities_1.Utils.getStringAt(rawData, 4, 12);
-        this.datatypeCode = utilities_1.Utils.getShortAt(rawData, 12, this.littleEndian);
-        this.numBitsPerVoxel = utilities_1.Utils.getShortAt(rawData, 14, this.littleEndian);
+        this.magic = Utils.getStringAt(rawData, 4, 12);
+        this.datatypeCode = Utils.getShortAt(rawData, 12, this.littleEndian);
+        this.numBitsPerVoxel = Utils.getShortAt(rawData, 14, this.littleEndian);
         for (ctr = 0; ctr < 8; ctr += 1) {
             index = 16 + ctr * 8;
-            this.dims[ctr] = utilities_1.Utils.getInt64At(rawData, index, this.littleEndian);
+            this.dims[ctr] = Utils.getInt64At(rawData, index, this.littleEndian);
         }
-        this.intent_p1 = utilities_1.Utils.getDoubleAt(rawData, 80, this.littleEndian);
-        this.intent_p2 = utilities_1.Utils.getDoubleAt(rawData, 88, this.littleEndian);
-        this.intent_p3 = utilities_1.Utils.getDoubleAt(rawData, 96, this.littleEndian);
+        this.intent_p1 = Utils.getDoubleAt(rawData, 80, this.littleEndian);
+        this.intent_p2 = Utils.getDoubleAt(rawData, 88, this.littleEndian);
+        this.intent_p3 = Utils.getDoubleAt(rawData, 96, this.littleEndian);
         for (ctr = 0; ctr < 8; ctr += 1) {
             index = 104 + ctr * 8;
-            this.pixDims[ctr] = utilities_1.Utils.getDoubleAt(rawData, index, this.littleEndian);
+            this.pixDims[ctr] = Utils.getDoubleAt(rawData, index, this.littleEndian);
         }
-        this.vox_offset = utilities_1.Utils.getInt64At(rawData, 168, this.littleEndian);
-        this.scl_slope = utilities_1.Utils.getDoubleAt(rawData, 176, this.littleEndian);
-        this.scl_inter = utilities_1.Utils.getDoubleAt(rawData, 184, this.littleEndian);
-        this.cal_max = utilities_1.Utils.getDoubleAt(rawData, 192, this.littleEndian);
-        this.cal_min = utilities_1.Utils.getDoubleAt(rawData, 200, this.littleEndian);
-        this.slice_duration = utilities_1.Utils.getDoubleAt(rawData, 208, this.littleEndian);
-        this.toffset = utilities_1.Utils.getDoubleAt(rawData, 216, this.littleEndian);
-        this.slice_start = utilities_1.Utils.getInt64At(rawData, 224, this.littleEndian);
-        this.slice_end = utilities_1.Utils.getInt64At(rawData, 232, this.littleEndian);
-        this.description = utilities_1.Utils.getStringAt(rawData, 240, 240 + 80);
-        this.aux_file = utilities_1.Utils.getStringAt(rawData, 320, 320 + 24);
-        this.qform_code = utilities_1.Utils.getIntAt(rawData, 344, this.littleEndian);
-        this.sform_code = utilities_1.Utils.getIntAt(rawData, 348, this.littleEndian);
-        this.quatern_b = utilities_1.Utils.getDoubleAt(rawData, 352, this.littleEndian);
-        this.quatern_c = utilities_1.Utils.getDoubleAt(rawData, 360, this.littleEndian);
-        this.quatern_d = utilities_1.Utils.getDoubleAt(rawData, 368, this.littleEndian);
-        this.qoffset_x = utilities_1.Utils.getDoubleAt(rawData, 376, this.littleEndian);
-        this.qoffset_y = utilities_1.Utils.getDoubleAt(rawData, 384, this.littleEndian);
-        this.qoffset_z = utilities_1.Utils.getDoubleAt(rawData, 392, this.littleEndian);
+        this.vox_offset = Utils.getInt64At(rawData, 168, this.littleEndian);
+        this.scl_slope = Utils.getDoubleAt(rawData, 176, this.littleEndian);
+        this.scl_inter = Utils.getDoubleAt(rawData, 184, this.littleEndian);
+        this.cal_max = Utils.getDoubleAt(rawData, 192, this.littleEndian);
+        this.cal_min = Utils.getDoubleAt(rawData, 200, this.littleEndian);
+        this.slice_duration = Utils.getDoubleAt(rawData, 208, this.littleEndian);
+        this.toffset = Utils.getDoubleAt(rawData, 216, this.littleEndian);
+        this.slice_start = Utils.getInt64At(rawData, 224, this.littleEndian);
+        this.slice_end = Utils.getInt64At(rawData, 232, this.littleEndian);
+        this.description = Utils.getStringAt(rawData, 240, 240 + 80);
+        this.aux_file = Utils.getStringAt(rawData, 320, 320 + 24);
+        this.qform_code = Utils.getIntAt(rawData, 344, this.littleEndian);
+        this.sform_code = Utils.getIntAt(rawData, 348, this.littleEndian);
+        this.quatern_b = Utils.getDoubleAt(rawData, 352, this.littleEndian);
+        this.quatern_c = Utils.getDoubleAt(rawData, 360, this.littleEndian);
+        this.quatern_d = Utils.getDoubleAt(rawData, 368, this.littleEndian);
+        this.qoffset_x = Utils.getDoubleAt(rawData, 376, this.littleEndian);
+        this.qoffset_y = Utils.getDoubleAt(rawData, 384, this.littleEndian);
+        this.qoffset_z = Utils.getDoubleAt(rawData, 392, this.littleEndian);
         for (ctrOut = 0; ctrOut < 3; ctrOut += 1) {
             for (ctrIn = 0; ctrIn < 4; ctrIn += 1) {
                 index = 400 + (ctrOut * 4 + ctrIn) * 8;
-                this.affine[ctrOut][ctrIn] = utilities_1.Utils.getDoubleAt(rawData, index, this.littleEndian);
+                this.affine[ctrOut][ctrIn] = Utils.getDoubleAt(rawData, index, this.littleEndian);
             }
         }
         this.affine[3][0] = 0;
         this.affine[3][1] = 0;
         this.affine[3][2] = 0;
         this.affine[3][3] = 1;
-        this.slice_code = utilities_1.Utils.getIntAt(rawData, 496, this.littleEndian);
-        this.xyzt_units = utilities_1.Utils.getIntAt(rawData, 500, this.littleEndian);
-        this.intent_code = utilities_1.Utils.getIntAt(rawData, 504, this.littleEndian);
-        this.intent_name = utilities_1.Utils.getStringAt(rawData, 508, 508 + 16);
-        this.dim_info = utilities_1.Utils.getByteAt(rawData, 524);
+        this.slice_code = Utils.getIntAt(rawData, 496, this.littleEndian);
+        this.xyzt_units = Utils.getIntAt(rawData, 500, this.littleEndian);
+        this.intent_code = Utils.getIntAt(rawData, 504, this.littleEndian);
+        this.intent_name = Utils.getStringAt(rawData, 508, 508 + 16);
+        this.dim_info = Utils.getByteAt(rawData, 524);
         if (rawData.byteLength > NIFTI2.MAGIC_COOKIE) {
-            this.extensionFlag[0] = utilities_1.Utils.getByteAt(rawData, 540);
-            this.extensionFlag[1] = utilities_1.Utils.getByteAt(rawData, 540 + 1);
-            this.extensionFlag[2] = utilities_1.Utils.getByteAt(rawData, 540 + 2);
-            this.extensionFlag[3] = utilities_1.Utils.getByteAt(rawData, 540 + 3);
+            this.extensionFlag[0] = Utils.getByteAt(rawData, 540);
+            this.extensionFlag[1] = Utils.getByteAt(rawData, 540 + 1);
+            this.extensionFlag[2] = Utils.getByteAt(rawData, 540 + 2);
+            this.extensionFlag[3] = Utils.getByteAt(rawData, 540 + 3);
             if (this.extensionFlag[0]) {
                 // read our extensions
-                this.extensions = utilities_1.Utils.getExtensionsAt(rawData, this.getExtensionLocation(), this.littleEndian, this.vox_offset);
+                this.extensions = Utils.getExtensionsAt(rawData, this.getExtensionLocation(), this.littleEndian, this.vox_offset);
                 // set the extensionSize and extensionCode from the first extension found
                 this.extensionSize = this.extensions[0].esize;
                 this.extensionCode = this.extensions[0].ecode;
@@ -179,7 +176,7 @@ class NIFTI2 {
      * @returns {string}
      */
     toFormattedString() {
-        var fmt = utilities_1.Utils.formatNumber, string = "";
+        var fmt = Utils.formatNumber, string = "";
         string +=
             "Datatype = " +
                 +this.datatypeCode +
@@ -320,9 +317,9 @@ class NIFTI2 {
             "Units Code = " +
                 this.xyzt_units +
                 " (" +
-                this.getUnitsCodeString(nifti1_1.NIFTI1.SPATIAL_UNITS_MASK & this.xyzt_units) +
+                this.getUnitsCodeString(NIFTI1.SPATIAL_UNITS_MASK & this.xyzt_units) +
                 ", " +
-                this.getUnitsCodeString(nifti1_1.NIFTI1.TEMPORAL_UNITS_MASK & this.xyzt_units) +
+                this.getUnitsCodeString(NIFTI1.TEMPORAL_UNITS_MASK & this.xyzt_units) +
                 ")\n";
         string += "Intent Code = " + this.intent_code + "\n";
         string += 'Intent Name: "' + this.intent_name + '"\n';
@@ -341,47 +338,47 @@ class NIFTI2 {
      * @param {DataView} data
      * @returns {number}
      */
-    getExtensionSize = nifti1_1.NIFTI1.prototype.getExtensionSize;
+    getExtensionSize = NIFTI1.prototype.getExtensionSize;
     /**
      * Returns the extension code.
      * @param {DataView} data
      * @returns {number}
      */
-    getExtensionCode = nifti1_1.NIFTI1.prototype.getExtensionCode;
+    getExtensionCode = NIFTI1.prototype.getExtensionCode;
     /**
      * Adds an extension
      * @param {NIFTIEXTENSION} extension
      * @param {number} index
      */
-    addExtension = nifti1_1.NIFTI1.prototype.addExtension;
+    addExtension = NIFTI1.prototype.addExtension;
     /**
      * Removes an extension
      * @param {number} index
      */
-    removeExtension = nifti1_1.NIFTI1.prototype.removeExtension;
+    removeExtension = NIFTI1.prototype.removeExtension;
     /**
      * Returns a human-readable string of datatype.
      * @param {number} code
      * @returns {string}
      */
-    getDatatypeCodeString = nifti1_1.NIFTI1.prototype.getDatatypeCodeString;
+    getDatatypeCodeString = NIFTI1.prototype.getDatatypeCodeString;
     /**
      * Returns a human-readable string of transform type.
      * @param {number} code
      * @returns {string}
      */
-    getTransformCodeString = nifti1_1.NIFTI1.prototype.getTransformCodeString;
+    getTransformCodeString = NIFTI1.prototype.getTransformCodeString;
     /**
      * Returns a human-readable string of spatial and temporal units.
      * @param {number} code
      * @returns {string}
      */
-    getUnitsCodeString = nifti1_1.NIFTI1.prototype.getUnitsCodeString;
+    getUnitsCodeString = NIFTI1.prototype.getUnitsCodeString;
     /**
      * Returns the qform matrix.
      * @returns {Array.<Array.<number>>}
      */
-    getQformMat = nifti1_1.NIFTI1.prototype.getQformMat;
+    getQformMat = NIFTI1.prototype.getQformMat;
     /**
      * Converts qform to an affine.  (See http://nifti.nimh.nih.gov/pub/dist/src/niftilib/nifti1_io.c)
      * @param {number} qb
@@ -396,15 +393,15 @@ class NIFTI2 {
      * @param {number} qfac
      * @returns {Array.<Array.<number>>}
      */
-    convertNiftiQFormToNiftiSForm = nifti1_1.NIFTI1.prototype.convertNiftiQFormToNiftiSForm;
+    convertNiftiQFormToNiftiSForm = NIFTI1.prototype.convertNiftiQFormToNiftiSForm;
     /**
      * Converts sform to an orientation string (e.g., XYZ+--).  (See http://nimh.nih.gov/pub/dist/src/niftilib/nifti1_io.c)
      * @param {Array.<Array.<number>>} R
      * @returns {string}
      */
-    convertNiftiSFormToNEMA = nifti1_1.NIFTI1.prototype.convertNiftiSFormToNEMA;
-    nifti_mat33_mul = nifti1_1.NIFTI1.prototype.nifti_mat33_mul;
-    nifti_mat33_determ = nifti1_1.NIFTI1.prototype.nifti_mat33_determ;
+    convertNiftiSFormToNEMA = NIFTI1.prototype.convertNiftiSFormToNEMA;
+    nifti_mat33_mul = NIFTI1.prototype.nifti_mat33_mul;
+    nifti_mat33_determ = NIFTI1.prototype.nifti_mat33_determ;
     /**
      * Returns header as ArrayBuffer.
      * @param {boolean} includeExtensions - should extension bytes be included
@@ -516,5 +513,5 @@ class NIFTI2 {
         return byteArray.buffer;
     }
 }
-exports.NIFTI2 = NIFTI2;
+export { NIFTI2 };
 //# sourceMappingURL=nifti2.js.map

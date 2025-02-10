@@ -1,4 +1,4 @@
-import { NIFTIEXTENSION } from "./nifti-extension";
+import { NIFTIEXTENSION } from "./nifti-extension.js";
 type TypedArray = Int8Array | Uint8Array | Uint8ClampedArray | Int16Array | Uint16Array | Int32Array | Uint32Array | Float32Array | Float64Array;
 export declare class Utils {
     /*** Static Pseudo-constants ***/

@@ -1,4 +1,4 @@
-import { NIFTIEXTENSION } from "./nifti-extension";
+import { NIFTIEXTENSION } from "./nifti-extension.js";
 /**
  * The NIFTI2 constructor.
  * @constructor

@@ -1,9 +1,9 @@
-import { NIFTI1 } from "./nifti1";
-import { NIFTI2 } from "./nifti2";
-export { NIFTI1 } from "./nifti1";
-export { NIFTI2 } from "./nifti2";
-export { Utils } from "./utilities";
-export { NIFTIEXTENSION } from "./nifti-extension";
+import { NIFTI1 } from "./nifti1.js";
+import { NIFTI2 } from "./nifti2.js";
+export { NIFTI1 } from "./nifti1.js";
+export { NIFTI2 } from "./nifti2.js";
+export { Utils } from "./utilities.js";
+export { NIFTIEXTENSION } from "./nifti-extension.js";
 /*** Static Methods ***/
 /**
  * Returns true if this data represents a NIFTI-1 header.
@@ -34,7 +34,7 @@ export declare function isCompressed(data: ArrayBuffer): boolean;
  * @param {ArrayBuffer} data
  * @returns {ArrayBuffer}
  */
-export declare function decompress(data: ArrayBuffer): ArrayBufferLike;
+export declare function decompress(data: ArrayBuffer): any;
 /**
  * Reads and returns the header object.
  * @param {ArrayBuffer} data

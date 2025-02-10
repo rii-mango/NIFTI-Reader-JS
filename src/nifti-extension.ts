@@ -9,41 +9,37 @@
  * @type {Function}
  */
 export class NIFTIEXTENSION {
-    esize: number;
-    ecode: number;
-    edata: ArrayBuffer;
-    littleEndian: boolean;
-  
-    constructor(
-      esize: number,
-      ecode: number,
-      edata: ArrayBuffer,
-      littleEndian: boolean
-    ) {
-      if (esize % 16 != 0) {
-        throw new Error("This does not appear to be a NIFTI extension");
-      }
-      this.esize = esize;
-      this.ecode = ecode;
-      this.edata = edata;
-      this.littleEndian = littleEndian;
+  esize: number
+  ecode: number
+  edata: ArrayBuffer
+  littleEndian: boolean
+
+  constructor(esize: number, ecode: number, edata: ArrayBuffer, littleEndian: boolean) {
+    if (esize % 16 != 0) {
+      throw new Error('This does not appear to be a NIFTI extension')
     }
-  
-    /**
-     * Returns extension as ArrayBuffer.
-     * @returns {ArrayBuffer}
-     */
-    toArrayBuffer() {
-      let byteArray = new Uint8Array(this.esize);
-      let data = new Uint8Array(this.edata);
-      byteArray.set(data, 8);
-  
-      let view = new DataView(byteArray.buffer);
-  
-      // size of extension
-      view.setInt32(0, this.esize, this.littleEndian);
-      view.setInt32(4, this.ecode, this.littleEndian);
-  
-      return byteArray.buffer;
-    }
+    this.esize = esize
+    this.ecode = ecode
+    this.edata = edata
+    this.littleEndian = littleEndian
   }
+
+  /**
+   * Returns extension as ArrayBuffer.
+   * @returns {ArrayBuffer}
+   */
+  toArrayBuffer() {
+    let byteArray = new Uint8Array(this.esize)
+    let data = new Uint8Array(this.edata)
+    byteArray.set(data, 8)
+
+    let view = new DataView(byteArray.buffer)
+
+    // size of extension
+    view.setInt32(0, this.esize, this.littleEndian)
+    view.setInt32(4, this.ecode, this.littleEndian)
+
+    return byteArray.buffer
+  }
+}
+

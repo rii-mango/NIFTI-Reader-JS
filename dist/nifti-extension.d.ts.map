@@ -1,0 +1,1 @@
+{"version":3,"file":"nifti-extension.d.ts","sourceRoot":"","sources":["../src/nifti-extension.ts"],"names":[],"mappings":"AAAA,qBAAqB;AACrB;;;;;;;;GAQG;AACH,qBAAa,cAAc;IACzB,KAAK,EAAE,MAAM,CAAA;IACb,KAAK,EAAE,MAAM,CAAA;IACb,KAAK,EAAE,WAAW,CAAA;IAClB,YAAY,EAAE,OAAO,CAAA;gBAET,KAAK,EAAE,MAAM,EAAE,KAAK,EAAE,MAAM,EAAE,KAAK,EAAE,WAAW,EAAE,YAAY,EAAE,OAAO;IAUnF;;;OAGG;IACH,aAAa;CAad"}
