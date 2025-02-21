@@ -36,11 +36,25 @@ export declare function isCompressed(data: ArrayBuffer): boolean;
  */
 export declare function decompress(data: ArrayBuffer): ArrayBufferLike;
 /**
+ * Returns promise of decompressed data.
+ * @param {ArrayBuffer} data
+ * @returns {Promise<ArrayBuffer>}
+ */
+export declare function decompressAsync(data: ArrayBuffer): Promise<ArrayBuffer>;
+/**
+ * Returns promise of decompressed initial portion of data, reads at least minOutputBytes or entire file.
+ * @param {ArrayBuffer} data
+ * @param {number } minOutputBytes
+ * @returns {Promise<ArrayBuffer>}
+ */
+export declare function decompressHeaderAsync(data: ArrayBuffer, minOutputBytes?: number): Promise<ArrayBufferLike>;
+/**
  * Reads and returns the header object.
  * @param {ArrayBuffer} data
  * @returns {NIFTI1|NIFTI2}
  */
 export declare function readHeader(data: ArrayBuffer, isHdrImgPairOK?: boolean): NIFTI1 | NIFTI2;
+export declare function readHeaderAsync(data: ArrayBuffer, isHdrImgPairOK?: boolean): Promise<NIFTI1 | NIFTI2>;
 /**
  * Returns true if this header contains an extension.
  * @param {NIFTI1|NIFTI2} header

@@ -1,5 +1,9 @@
 import { NIFTIEXTENSION } from './nifti-extension.js';
-class Utils {
+export class Utils {
+    /*** Static Pseudo-constants ***/
+    static crcTable = null;
+    static GUNZIP_MAGIC_COOKIE1 = 31;
+    static GUNZIP_MAGIC_COOKIE2 = 139;
     /*** Static methods ***/
     static getStringAt(data, start, end) {
         var str = '', ctr, ch;
@@ -11,6 +15,12 @@ class Utils {
         }
         return str;
     }
+    static getByteAt = function (data, start) {
+        return data.getUint8(start);
+    };
+    static getShortAt = function (data, start, littleEndian) {
+        return data.getInt16(start, littleEndian);
+    };
     static getIntAt(data, start, littleEndian) {
         return data.getInt32(start, littleEndian);
     }
@@ -35,6 +45,14 @@ class Utils {
             result += -1 * 2 ** 32 * 2 ** 32;
         }
         return result;
+    }
+    static getUint64At(dataView, index, littleEndian) {
+        const low = dataView.getUint32(index + (littleEndian ? 0 : 4), littleEndian);
+        const high = dataView.getUint32(index + (littleEndian ? 4 : 0), littleEndian);
+        // Combine high and low bits. For littleEndian, high bits go first in the multiplication
+        return littleEndian
+            ? high * 2 ** 32 + low
+            : low * 2 ** 32 + high;
     }
     static getExtensionsAt(data, start, littleEndian, voxOffset) {
         let extensions = [];
@@ -121,15 +139,4 @@ class Utils {
         return (crc ^ -1) >>> 0;
     }
 }
-/*** Static Pseudo-constants ***/
-Utils.crcTable = null;
-Utils.GUNZIP_MAGIC_COOKIE1 = 31;
-Utils.GUNZIP_MAGIC_COOKIE2 = 139;
-Utils.getByteAt = function (data, start) {
-    return data.getUint8(start);
-};
-Utils.getShortAt = function (data, start, littleEndian) {
-    return data.getInt16(start, littleEndian);
-};
-export { Utils };
 //# sourceMappingURL=utilities.js.map

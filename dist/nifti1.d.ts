@@ -218,6 +218,6 @@ export declare class NIFTI1 {
      * @param {boolean} includeExtensions - should extension bytes be included
      * @returns {ArrayBuffer}
      */
-    toArrayBuffer(includeExtensions?: boolean): ArrayBufferLike;
+    toArrayBuffer(includeExtensions?: boolean): ArrayBuffer;
 }
 //# sourceMappingURL=nifti1.d.ts.map

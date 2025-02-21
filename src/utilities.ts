@@ -72,6 +72,16 @@ export class Utils {
     return result
   }
 
+  static getUint64At(dataView: DataView, index: number, littleEndian: boolean): number {
+    const low = dataView.getUint32(index + (littleEndian ? 0 : 4), littleEndian)
+    const high = dataView.getUint32(index + (littleEndian ? 4 : 0), littleEndian)
+    
+    // Combine high and low bits. For littleEndian, high bits go first in the multiplication
+    return littleEndian
+      ? high * 2 ** 32 + low
+      : low * 2 ** 32 + high
+  }
+
   static getExtensionsAt(data: DataView, start: number, littleEndian: boolean, voxOffset: number) {
     let extensions: NIFTIEXTENSION[] = []
     let extensionByteIndex = start

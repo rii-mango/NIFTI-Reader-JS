@@ -145,7 +145,7 @@ export declare class NIFTI2 {
      * Returns the qform matrix.
      * @returns {Array.<Array.<number>>}
      */
-    getQformMat: () => number[][];
+    getQformMat: () => Array<Array<number>>;
     /**
      * Converts qform to an affine.  (See http://nifti.nimh.nih.gov/pub/dist/src/niftilib/nifti1_io.c)
      * @param {number} qb
@@ -160,13 +160,13 @@ export declare class NIFTI2 {
      * @param {number} qfac
      * @returns {Array.<Array.<number>>}
      */
-    convertNiftiQFormToNiftiSForm: (qb: number, qc: number, qd: number, qx: number, qy: number, qz: number, dx: number, dy: number, dz: number, qfac: number) => number[][];
+    convertNiftiQFormToNiftiSForm: (qb: number, qc: number, qd: number, qx: number, qy: number, qz: number, dx: number, dy: number, dz: number, qfac: number) => Array<Array<number>>;
     /**
      * Converts sform to an orientation string (e.g., XYZ+--).  (See http://nimh.nih.gov/pub/dist/src/niftilib/nifti1_io.c)
      * @param {Array.<Array.<number>>} R
      * @returns {string}
      */
-    convertNiftiSFormToNEMA: (R: number[][]) => string | null;
+    convertNiftiSFormToNEMA: (R: Array<Array<number>>) => string | null;
     nifti_mat33_mul: (A: number[][], B: number[][]) => number[][];
     nifti_mat33_determ: (R: number[][]) => number;
     /**
@@ -174,6 +174,6 @@ export declare class NIFTI2 {
      * @param {boolean} includeExtensions - should extension bytes be included
      * @returns {ArrayBuffer}
      */
-    toArrayBuffer(includeExtensions?: boolean): ArrayBufferLike;
+    toArrayBuffer(includeExtensions?: boolean): ArrayBuffer;
 }
 //# sourceMappingURL=nifti2.d.ts.map

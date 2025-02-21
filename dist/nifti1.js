@@ -44,184 +44,99 @@ import { Utils } from './utilities.js';
  * @property {nifti.NIFTIEXTENSION[]} extensions
  * @type {Function}
  */
-class NIFTI1 {
-    constructor() {
-        this.littleEndian = false;
-        this.dim_info = 0;
-        this.dims = [];
-        this.intent_p1 = 0.0;
-        this.intent_p2 = 0.0;
-        this.intent_p3 = 0.0;
-        this.intent_code = 0;
-        this.datatypeCode = 0;
-        this.numBitsPerVoxel = 0;
-        this.slice_start = 0;
-        this.slice_end = 0;
-        this.slice_code = 0;
-        this.pixDims = [];
-        this.vox_offset = 0;
-        this.scl_slope = 1.0;
-        this.scl_inter = 0.0;
-        this.xyzt_units = 0;
-        this.cal_max = 0.0;
-        this.cal_min = 0.0;
-        this.slice_duration = 0.0;
-        this.toffset = 0.0;
-        this.description = '';
-        this.aux_file = '';
-        this.intent_name = '';
-        this.qform_code = 0;
-        this.sform_code = 0;
-        this.quatern_a = 0.0;
-        this.quatern_b = 0.0;
-        this.quatern_c = 0.0;
-        this.quatern_d = 0.0;
-        this.qoffset_x = 0.0;
-        this.qoffset_y = 0.0;
-        this.qoffset_z = 0.0;
-        this.affine = [
-            [1, 0, 0, 0],
-            [0, 1, 0, 0],
-            [0, 0, 1, 0],
-            [0, 0, 0, 1]
-        ];
-        this.qfac = 1;
-        this.magic = '0';
-        this.isHDR = false;
-        this.extensionFlag = [0, 0, 0, 0];
-        this.extensionSize = 0;
-        this.extensionCode = 0;
-        this.extensions = [];
-        /**
-         * Returns a human-readable string of datatype.
-         * @param {number} code
-         * @returns {string}
-         */
-        this.getDatatypeCodeString = function (code) {
-            if (code === NIFTI1.TYPE_UINT8) {
-                return '1-Byte Unsigned Integer';
-            }
-            else if (code === NIFTI1.TYPE_INT16) {
-                return '2-Byte Signed Integer';
-            }
-            else if (code === NIFTI1.TYPE_INT32) {
-                return '4-Byte Signed Integer';
-            }
-            else if (code === NIFTI1.TYPE_FLOAT32) {
-                return '4-Byte Float';
-            }
-            else if (code === NIFTI1.TYPE_FLOAT64) {
-                return '8-Byte Float';
-            }
-            else if (code === NIFTI1.TYPE_RGB24) {
-                return 'RGB';
-            }
-            else if (code === NIFTI1.TYPE_INT8) {
-                return '1-Byte Signed Integer';
-            }
-            else if (code === NIFTI1.TYPE_UINT16) {
-                return '2-Byte Unsigned Integer';
-            }
-            else if (code === NIFTI1.TYPE_UINT32) {
-                return '4-Byte Unsigned Integer';
-            }
-            else if (code === NIFTI1.TYPE_INT64) {
-                return '8-Byte Signed Integer';
-            }
-            else if (code === NIFTI1.TYPE_UINT64) {
-                return '8-Byte Unsigned Integer';
-            }
-            else {
-                return 'Unknown';
-            }
-        };
-        /**
-         * Returns a human-readable string of transform type.
-         * @param {number} code
-         * @returns {string}
-         */
-        this.getTransformCodeString = function (code) {
-            if (code === NIFTI1.XFORM_SCANNER_ANAT) {
-                return 'Scanner';
-            }
-            else if (code === NIFTI1.XFORM_ALIGNED_ANAT) {
-                return 'Aligned';
-            }
-            else if (code === NIFTI1.XFORM_TALAIRACH) {
-                return 'Talairach';
-            }
-            else if (code === NIFTI1.XFORM_MNI_152) {
-                return 'MNI';
-            }
-            else {
-                return 'Unknown';
-            }
-        };
-        /**
-         * Returns a human-readable string of spatial and temporal units.
-         * @param {number} code
-         * @returns {string}
-         */
-        this.getUnitsCodeString = function (code) {
-            if (code === NIFTI1.UNITS_METER) {
-                return 'Meters';
-            }
-            else if (code === NIFTI1.UNITS_MM) {
-                return 'Millimeters';
-            }
-            else if (code === NIFTI1.UNITS_MICRON) {
-                return 'Microns';
-            }
-            else if (code === NIFTI1.UNITS_SEC) {
-                return 'Seconds';
-            }
-            else if (code === NIFTI1.UNITS_MSEC) {
-                return 'Milliseconds';
-            }
-            else if (code === NIFTI1.UNITS_USEC) {
-                return 'Microseconds';
-            }
-            else if (code === NIFTI1.UNITS_HZ) {
-                return 'Hz';
-            }
-            else if (code === NIFTI1.UNITS_PPM) {
-                return 'PPM';
-            }
-            else if (code === NIFTI1.UNITS_RADS) {
-                return 'Rads';
-            }
-            else {
-                return 'Unknown';
-            }
-        };
-        this.nifti_mat33_mul = function (A, B) {
-            var C = [
-                [0, 0, 0],
-                [0, 0, 0],
-                [0, 0, 0]
-            ], i, j;
-            for (i = 0; i < 3; i += 1) {
-                for (j = 0; j < 3; j += 1) {
-                    C[i][j] = A[i][0] * B[0][j] + A[i][1] * B[1][j] + A[i][2] * B[2][j];
-                }
-            }
-            return C;
-        };
-        this.nifti_mat33_determ = function (R) {
-            var r11, r12, r13, r21, r22, r23, r31, r32, r33;
-            /*  INPUT MATRIX:  */
-            r11 = R[0][0];
-            r12 = R[0][1];
-            r13 = R[0][2];
-            r21 = R[1][0];
-            r22 = R[1][1];
-            r23 = R[1][2];
-            r31 = R[2][0];
-            r32 = R[2][1];
-            r33 = R[2][2];
-            return r11 * r22 * r33 - r11 * r32 * r23 - r21 * r12 * r33 + r21 * r32 * r13 + r31 * r12 * r23 - r31 * r22 * r13;
-        };
-    }
+export class NIFTI1 {
+    littleEndian = false;
+    dim_info = 0;
+    dims = [];
+    intent_p1 = 0.0;
+    intent_p2 = 0.0;
+    intent_p3 = 0.0;
+    intent_code = 0;
+    datatypeCode = 0;
+    numBitsPerVoxel = 0;
+    slice_start = 0;
+    slice_end = 0;
+    slice_code = 0;
+    pixDims = [];
+    vox_offset = 0;
+    scl_slope = 1.0;
+    scl_inter = 0.0;
+    xyzt_units = 0;
+    cal_max = 0.0;
+    cal_min = 0.0;
+    slice_duration = 0.0;
+    toffset = 0.0;
+    description = '';
+    aux_file = '';
+    intent_name = '';
+    qform_code = 0;
+    sform_code = 0;
+    quatern_a = 0.0;
+    quatern_b = 0.0;
+    quatern_c = 0.0;
+    quatern_d = 0.0;
+    qoffset_x = 0.0;
+    qoffset_y = 0.0;
+    qoffset_z = 0.0;
+    affine = [
+        [1, 0, 0, 0],
+        [0, 1, 0, 0],
+        [0, 0, 1, 0],
+        [0, 0, 0, 1]
+    ];
+    qfac = 1;
+    quatern_R;
+    magic = '0';
+    isHDR = false;
+    extensionFlag = [0, 0, 0, 0];
+    extensionSize = 0;
+    extensionCode = 0;
+    extensions = [];
+    /*** Static Pseudo-constants ***/
+    // datatype codes
+    static TYPE_NONE = 0;
+    static TYPE_BINARY = 1;
+    static TYPE_UINT8 = 2;
+    static TYPE_INT16 = 4;
+    static TYPE_INT32 = 8;
+    static TYPE_FLOAT32 = 16;
+    static TYPE_COMPLEX64 = 32;
+    static TYPE_FLOAT64 = 64;
+    static TYPE_RGB24 = 128;
+    static TYPE_INT8 = 256;
+    static TYPE_UINT16 = 512;
+    static TYPE_UINT32 = 768;
+    static TYPE_INT64 = 1024;
+    static TYPE_UINT64 = 1280;
+    static TYPE_FLOAT128 = 1536;
+    static TYPE_COMPLEX128 = 1792;
+    static TYPE_COMPLEX256 = 2048;
+    // transform codes
+    static XFORM_UNKNOWN = 0;
+    static XFORM_SCANNER_ANAT = 1;
+    static XFORM_ALIGNED_ANAT = 2;
+    static XFORM_TALAIRACH = 3;
+    static XFORM_MNI_152 = 4;
+    // unit codes
+    static SPATIAL_UNITS_MASK = 0x07;
+    static TEMPORAL_UNITS_MASK = 0x38;
+    static UNITS_UNKNOWN = 0;
+    static UNITS_METER = 1;
+    static UNITS_MM = 2;
+    static UNITS_MICRON = 3;
+    static UNITS_SEC = 8;
+    static UNITS_MSEC = 16;
+    static UNITS_USEC = 24;
+    static UNITS_HZ = 32;
+    static UNITS_PPM = 40;
+    static UNITS_RADS = 48;
+    // nifti1 codes
+    static MAGIC_COOKIE = 348;
+    static STANDARD_HEADER_SIZE = 348;
+    static MAGIC_NUMBER_LOCATION = 344;
+    static MAGIC_NUMBER = [0x6e, 0x2b, 0x31]; // n+1 (.nii)
+    static MAGIC_NUMBER2 = [0x6e, 0x69, 0x31]; // ni1 (.hdr/.img)
+    static EXTENSION_HEADER_SIZE = 8;
     /*** Prototype Methods ***/
     /**
      * Reads the header data.
@@ -530,6 +445,108 @@ class NIFTI1 {
         }
         return string;
     }
+    /**
+     * Returns a human-readable string of datatype.
+     * @param {number} code
+     * @returns {string}
+     */
+    getDatatypeCodeString = function (code) {
+        if (code === NIFTI1.TYPE_UINT8) {
+            return '1-Byte Unsigned Integer';
+        }
+        else if (code === NIFTI1.TYPE_INT16) {
+            return '2-Byte Signed Integer';
+        }
+        else if (code === NIFTI1.TYPE_INT32) {
+            return '4-Byte Signed Integer';
+        }
+        else if (code === NIFTI1.TYPE_FLOAT32) {
+            return '4-Byte Float';
+        }
+        else if (code === NIFTI1.TYPE_FLOAT64) {
+            return '8-Byte Float';
+        }
+        else if (code === NIFTI1.TYPE_RGB24) {
+            return 'RGB';
+        }
+        else if (code === NIFTI1.TYPE_INT8) {
+            return '1-Byte Signed Integer';
+        }
+        else if (code === NIFTI1.TYPE_UINT16) {
+            return '2-Byte Unsigned Integer';
+        }
+        else if (code === NIFTI1.TYPE_UINT32) {
+            return '4-Byte Unsigned Integer';
+        }
+        else if (code === NIFTI1.TYPE_INT64) {
+            return '8-Byte Signed Integer';
+        }
+        else if (code === NIFTI1.TYPE_UINT64) {
+            return '8-Byte Unsigned Integer';
+        }
+        else {
+            return 'Unknown';
+        }
+    };
+    /**
+     * Returns a human-readable string of transform type.
+     * @param {number} code
+     * @returns {string}
+     */
+    getTransformCodeString = function (code) {
+        if (code === NIFTI1.XFORM_SCANNER_ANAT) {
+            return 'Scanner';
+        }
+        else if (code === NIFTI1.XFORM_ALIGNED_ANAT) {
+            return 'Aligned';
+        }
+        else if (code === NIFTI1.XFORM_TALAIRACH) {
+            return 'Talairach';
+        }
+        else if (code === NIFTI1.XFORM_MNI_152) {
+            return 'MNI';
+        }
+        else {
+            return 'Unknown';
+        }
+    };
+    /**
+     * Returns a human-readable string of spatial and temporal units.
+     * @param {number} code
+     * @returns {string}
+     */
+    getUnitsCodeString = function (code) {
+        if (code === NIFTI1.UNITS_METER) {
+            return 'Meters';
+        }
+        else if (code === NIFTI1.UNITS_MM) {
+            return 'Millimeters';
+        }
+        else if (code === NIFTI1.UNITS_MICRON) {
+            return 'Microns';
+        }
+        else if (code === NIFTI1.UNITS_SEC) {
+            return 'Seconds';
+        }
+        else if (code === NIFTI1.UNITS_MSEC) {
+            return 'Milliseconds';
+        }
+        else if (code === NIFTI1.UNITS_USEC) {
+            return 'Microseconds';
+        }
+        else if (code === NIFTI1.UNITS_HZ) {
+            return 'Hz';
+        }
+        else if (code === NIFTI1.UNITS_PPM) {
+            return 'PPM';
+        }
+        else if (code === NIFTI1.UNITS_RADS) {
+            return 'Rads';
+        }
+        else {
+            return 'Unknown';
+        }
+    };
     /**
      * Returns the qform matrix.
      * @returns {Array.<Array.<number>>}
@@ -862,6 +879,33 @@ class NIFTI1 {
         }
         return iChar + jChar + kChar + iSense + jSense + kSense;
     }
+    nifti_mat33_mul = function (A, B) {
+        var C = [
+            [0, 0, 0],
+            [0, 0, 0],
+            [0, 0, 0]
+        ], i, j;
+        for (i = 0; i < 3; i += 1) {
+            for (j = 0; j < 3; j += 1) {
+                C[i][j] = A[i][0] * B[0][j] + A[i][1] * B[1][j] + A[i][2] * B[2][j];
+            }
+        }
+        return C;
+    };
+    nifti_mat33_determ = function (R) {
+        var r11, r12, r13, r21, r22, r23, r31, r32, r33;
+        /*  INPUT MATRIX:  */
+        r11 = R[0][0];
+        r12 = R[0][1];
+        r13 = R[0][2];
+        r21 = R[1][0];
+        r22 = R[1][1];
+        r23 = R[1][2];
+        r31 = R[2][0];
+        r32 = R[2][1];
+        r33 = R[2][2];
+        return r11 * r22 * r33 - r11 * r32 * r23 - r21 * r12 * r33 + r21 * r32 * r13 + r31 * r12 * r23 - r31 * r22 * r13;
+    };
     /**
      * Returns the byte index of the extension.
      * @returns {number}
@@ -1002,50 +1046,4 @@ class NIFTI1 {
         return byteArray.buffer;
     }
 }
-/*** Static Pseudo-constants ***/
-// datatype codes
-NIFTI1.TYPE_NONE = 0;
-NIFTI1.TYPE_BINARY = 1;
-NIFTI1.TYPE_UINT8 = 2;
-NIFTI1.TYPE_INT16 = 4;
-NIFTI1.TYPE_INT32 = 8;
-NIFTI1.TYPE_FLOAT32 = 16;
-NIFTI1.TYPE_COMPLEX64 = 32;
-NIFTI1.TYPE_FLOAT64 = 64;
-NIFTI1.TYPE_RGB24 = 128;
-NIFTI1.TYPE_INT8 = 256;
-NIFTI1.TYPE_UINT16 = 512;
-NIFTI1.TYPE_UINT32 = 768;
-NIFTI1.TYPE_INT64 = 1024;
-NIFTI1.TYPE_UINT64 = 1280;
-NIFTI1.TYPE_FLOAT128 = 1536;
-NIFTI1.TYPE_COMPLEX128 = 1792;
-NIFTI1.TYPE_COMPLEX256 = 2048;
-// transform codes
-NIFTI1.XFORM_UNKNOWN = 0;
-NIFTI1.XFORM_SCANNER_ANAT = 1;
-NIFTI1.XFORM_ALIGNED_ANAT = 2;
-NIFTI1.XFORM_TALAIRACH = 3;
-NIFTI1.XFORM_MNI_152 = 4;
-// unit codes
-NIFTI1.SPATIAL_UNITS_MASK = 0x07;
-NIFTI1.TEMPORAL_UNITS_MASK = 0x38;
-NIFTI1.UNITS_UNKNOWN = 0;
-NIFTI1.UNITS_METER = 1;
-NIFTI1.UNITS_MM = 2;
-NIFTI1.UNITS_MICRON = 3;
-NIFTI1.UNITS_SEC = 8;
-NIFTI1.UNITS_MSEC = 16;
-NIFTI1.UNITS_USEC = 24;
-NIFTI1.UNITS_HZ = 32;
-NIFTI1.UNITS_PPM = 40;
-NIFTI1.UNITS_RADS = 48;
-// nifti1 codes
-NIFTI1.MAGIC_COOKIE = 348;
-NIFTI1.STANDARD_HEADER_SIZE = 348;
-NIFTI1.MAGIC_NUMBER_LOCATION = 344;
-NIFTI1.MAGIC_NUMBER = [0x6e, 0x2b, 0x31]; // n+1 (.nii)
-NIFTI1.MAGIC_NUMBER2 = [0x6e, 0x69, 0x31]; // ni1 (.hdr/.img)
-NIFTI1.EXTENSION_HEADER_SIZE = 8;
-export { NIFTI1 };
 //# sourceMappingURL=nifti1.js.map

@@ -26,7 +26,7 @@
     "jsdoc-to-markdown": "*",
     "prettier": "^3.5.0",
     "tsify": "^5.0.4",
-    "typescript": "^5.0.4",
+    "typescript": "^5.7.3",
     "vitest": "^3.0.5"
   },
   "scripts": {

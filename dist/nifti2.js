@@ -41,128 +41,55 @@ import { Utils } from './utilities.js';
  * @property {NIFTIEXTENSION[]} extensions
  * @type {Function}
  */
-class NIFTI2 {
-    constructor() {
-        this.littleEndian = false;
-        this.dim_info = 0;
-        this.dims = [];
-        this.intent_p1 = 0;
-        this.intent_p2 = 0;
-        this.intent_p3 = 0;
-        this.intent_code = 0;
-        this.datatypeCode = 0;
-        this.numBitsPerVoxel = 0;
-        this.slice_start = 0;
-        this.slice_end = 0;
-        this.slice_code = 0;
-        this.pixDims = [];
-        this.vox_offset = 0;
-        this.scl_slope = 1;
-        this.scl_inter = 0;
-        this.xyzt_units = 0;
-        this.cal_max = 0;
-        this.cal_min = 0;
-        this.slice_duration = 0;
-        this.toffset = 0;
-        this.description = '';
-        this.aux_file = '';
-        this.intent_name = '';
-        this.qform_code = 0;
-        this.sform_code = 0;
-        this.quatern_b = 0;
-        this.quatern_c = 0;
-        this.quatern_d = 0;
-        this.qoffset_x = 0;
-        this.qoffset_y = 0;
-        this.qoffset_z = 0;
-        this.affine = [
-            [1, 0, 0, 0],
-            [0, 1, 0, 0],
-            [0, 0, 1, 0],
-            [0, 0, 0, 1]
-        ];
-        this.magic = '0';
-        this.extensionFlag = [0, 0, 0, 0];
-        this.extensions = [];
-        this.extensionSize = 0;
-        this.extensionCode = 0;
-        /**
-         * Returns the byte index of the extension.
-         * @returns {number}
-         */
-        this.getExtensionLocation = function () {
-            return NIFTI2.MAGIC_COOKIE + 4;
-        };
-        /**
-         * Returns the extension size.
-         * @param {DataView} data
-         * @returns {number}
-         */
-        this.getExtensionSize = NIFTI1.prototype.getExtensionSize;
-        /**
-         * Returns the extension code.
-         * @param {DataView} data
-         * @returns {number}
-         */
-        this.getExtensionCode = NIFTI1.prototype.getExtensionCode;
-        /**
-         * Adds an extension
-         * @param {NIFTIEXTENSION} extension
-         * @param {number} index
-         */
-        this.addExtension = NIFTI1.prototype.addExtension;
-        /**
-         * Removes an extension
-         * @param {number} index
-         */
-        this.removeExtension = NIFTI1.prototype.removeExtension;
-        /**
-         * Returns a human-readable string of datatype.
-         * @param {number} code
-         * @returns {string}
-         */
-        this.getDatatypeCodeString = NIFTI1.prototype.getDatatypeCodeString;
-        /**
-         * Returns a human-readable string of transform type.
-         * @param {number} code
-         * @returns {string}
-         */
-        this.getTransformCodeString = NIFTI1.prototype.getTransformCodeString;
-        /**
-         * Returns a human-readable string of spatial and temporal units.
-         * @param {number} code
-         * @returns {string}
-         */
-        this.getUnitsCodeString = NIFTI1.prototype.getUnitsCodeString;
-        /**
-         * Returns the qform matrix.
-         * @returns {Array.<Array.<number>>}
-         */
-        this.getQformMat = NIFTI1.prototype.getQformMat;
-        /**
-         * Converts qform to an affine.  (See http://nifti.nimh.nih.gov/pub/dist/src/niftilib/nifti1_io.c)
-         * @param {number} qb
-         * @param {number} qc
-         * @param {number} qd
-         * @param {number} qx
-         * @param {number} qy
-         * @param {number} qz
-         * @param {number} dx
-         * @param {number} dy
-         * @param {number} dz
-         * @param {number} qfac
-         * @returns {Array.<Array.<number>>}
-         */
-        this.convertNiftiQFormToNiftiSForm = NIFTI1.prototype.convertNiftiQFormToNiftiSForm;
-        /**
-         * Converts sform to an orientation string (e.g., XYZ+--).  (See http://nimh.nih.gov/pub/dist/src/niftilib/nifti1_io.c)
-         * @param {Array.<Array.<number>>} R
-         * @returns {string}
-         */
-        this.convertNiftiSFormToNEMA = NIFTI1.prototype.convertNiftiSFormToNEMA;
-        this.nifti_mat33_mul = NIFTI1.prototype.nifti_mat33_mul;
-        this.nifti_mat33_determ = NIFTI1.prototype.nifti_mat33_determ;
-    }
+export class NIFTI2 {
+    littleEndian = false;
+    dim_info = 0;
+    dims = [];
+    intent_p1 = 0;
+    intent_p2 = 0;
+    intent_p3 = 0;
+    intent_code = 0;
+    datatypeCode = 0;
+    numBitsPerVoxel = 0;
+    slice_start = 0;
+    slice_end = 0;
+    slice_code = 0;
+    pixDims = [];
+    vox_offset = 0;
+    scl_slope = 1;
+    scl_inter = 0;
+    xyzt_units = 0;
+    cal_max = 0;
+    cal_min = 0;
+    slice_duration = 0;
+    toffset = 0;
+    description = '';
+    aux_file = '';
+    intent_name = '';
+    qform_code = 0;
+    sform_code = 0;
+    quatern_b = 0;
+    quatern_c = 0;
+    quatern_d = 0;
+    qoffset_x = 0;
+    qoffset_y = 0;
+    qoffset_z = 0;
+    affine = [
+        [1, 0, 0, 0],
+        [0, 1, 0, 0],
+        [0, 0, 1, 0],
+        [0, 0, 0, 1]
+    ];
+    magic = '0';
+    extensionFlag = [0, 0, 0, 0];
+    extensions = [];
+    extensionSize = 0;
+    extensionCode = 0;
+    /*** Static Pseudo-constants ***/
+    static MAGIC_COOKIE = 540;
+    static MAGIC_NUMBER_LOCATION = 4;
+    static MAGIC_NUMBER = [0x6e, 0x2b, 0x32, 0, 0x0d, 0x0a, 0x1a, 0x0a]; // n+2\0
+    static MAGIC_NUMBER2 = [0x6e, 0x69, 0x32, 0, 0x0d, 0x0a, 0x1a, 0x0a]; // ni2\0
     /*** Prototype Methods ***/
     /**
      * Reads the header data.
@@ -364,6 +291,82 @@ class NIFTI2 {
         return string;
     }
     /**
+     * Returns the byte index of the extension.
+     * @returns {number}
+     */
+    getExtensionLocation = function () {
+        return NIFTI2.MAGIC_COOKIE + 4;
+    };
+    /**
+     * Returns the extension size.
+     * @param {DataView} data
+     * @returns {number}
+     */
+    getExtensionSize = NIFTI1.prototype.getExtensionSize;
+    /**
+     * Returns the extension code.
+     * @param {DataView} data
+     * @returns {number}
+     */
+    getExtensionCode = NIFTI1.prototype.getExtensionCode;
+    /**
+     * Adds an extension
+     * @param {NIFTIEXTENSION} extension
+     * @param {number} index
+     */
+    addExtension = NIFTI1.prototype.addExtension;
+    /**
+     * Removes an extension
+     * @param {number} index
+     */
+    removeExtension = NIFTI1.prototype.removeExtension;
+    /**
+     * Returns a human-readable string of datatype.
+     * @param {number} code
+     * @returns {string}
+     */
+    getDatatypeCodeString = NIFTI1.prototype.getDatatypeCodeString;
+    /**
+     * Returns a human-readable string of transform type.
+     * @param {number} code
+     * @returns {string}
+     */
+    getTransformCodeString = NIFTI1.prototype.getTransformCodeString;
+    /**
+     * Returns a human-readable string of spatial and temporal units.
+     * @param {number} code
+     * @returns {string}
+     */
+    getUnitsCodeString = NIFTI1.prototype.getUnitsCodeString;
+    /**
+     * Returns the qform matrix.
+     * @returns {Array.<Array.<number>>}
+     */
+    getQformMat = NIFTI1.prototype.getQformMat;
+    /**
+     * Converts qform to an affine.  (See http://nifti.nimh.nih.gov/pub/dist/src/niftilib/nifti1_io.c)
+     * @param {number} qb
+     * @param {number} qc
+     * @param {number} qd
+     * @param {number} qx
+     * @param {number} qy
+     * @param {number} qz
+     * @param {number} dx
+     * @param {number} dy
+     * @param {number} dz
+     * @param {number} qfac
+     * @returns {Array.<Array.<number>>}
+     */
+    convertNiftiQFormToNiftiSForm = NIFTI1.prototype.convertNiftiQFormToNiftiSForm;
+    /**
+     * Converts sform to an orientation string (e.g., XYZ+--).  (See http://nimh.nih.gov/pub/dist/src/niftilib/nifti1_io.c)
+     * @param {Array.<Array.<number>>} R
+     * @returns {string}
+     */
+    convertNiftiSFormToNEMA = NIFTI1.prototype.convertNiftiSFormToNEMA;
+    nifti_mat33_mul = NIFTI1.prototype.nifti_mat33_mul;
+    nifti_mat33_determ = NIFTI1.prototype.nifti_mat33_determ;
+    /**
      * Returns header as ArrayBuffer.
      * @param {boolean} includeExtensions - should extension bytes be included
      * @returns {ArrayBuffer}
@@ -474,10 +477,4 @@ class NIFTI2 {
         return byteArray.buffer;
     }
 }
-/*** Static Pseudo-constants ***/
-NIFTI2.MAGIC_COOKIE = 540;
-NIFTI2.MAGIC_NUMBER_LOCATION = 4;
-NIFTI2.MAGIC_NUMBER = [0x6e, 0x2b, 0x32, 0, 0x0d, 0x0a, 0x1a, 0x0a]; // n+2\0
-NIFTI2.MAGIC_NUMBER2 = [0x6e, 0x69, 0x32, 0, 0x0d, 0x0a, 0x1a, 0x0a]; // ni2\0
-export { NIFTI2 };
 //# sourceMappingURL=nifti2.js.map

@@ -9,6 +9,10 @@
  * @type {Function}
  */
 export class NIFTIEXTENSION {
+    esize;
+    ecode;
+    edata;
+    littleEndian;
     constructor(esize, ecode, edata, littleEndian) {
         if (esize % 16 != 0) {
             throw new Error('This does not appear to be a NIFTI extension');

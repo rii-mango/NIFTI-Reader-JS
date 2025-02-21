@@ -87,6 +87,109 @@ export function decompress(data) {
     return decompressSync(new Uint8Array(data)).buffer;
 }
 /**
+ * Returns promise of decompressed data.
+ * @param {ArrayBuffer} data
+ * @returns {Promise<ArrayBuffer>}
+ */
+export async function decompressAsync(data) {
+    const uint8Data = new Uint8Array(data);
+    const format = uint8Data[0] === 31 && uint8Data[1] === 139 && uint8Data[2] === 8
+        ? 'gzip'
+        : uint8Data[0] === 120 && (uint8Data[1] === 1 || uint8Data[1] === 94 || uint8Data[1] === 156 || uint8Data[1] === 218)
+            ? 'deflate'
+            : 'deflate-raw';
+    const stream = new DecompressionStream(format);
+    const writer = stream.writable.getWriter();
+    writer.write(uint8Data).catch(console.error); // Do not await this
+    // Close without awaiting directly, preventing the hang issue
+    const closePromise = writer.close().catch(console.error);
+    const response = new Response(stream.readable);
+    const result = await response.arrayBuffer(); // Return ArrayBuffer instead of Uint8Array
+    await closePromise; // Ensure close happens eventually
+    return result;
+}
+/**
+ * Returns promise of decompressed initial portion of data, reads at least minOutputBytes or entire file.
+ * @param {ArrayBuffer} data
+ * @param {number } minOutputBytes
+ * @returns {Promise<ArrayBuffer>}
+ */
+export async function decompressHeaderAsync(data, minOutputBytes = Infinity) {
+    // Utility function to detect compression format
+    const detectFormat = (data) => {
+        if (data[0] === 31 && data[1] === 139 && data[2] === 8)
+            return 'gzip';
+        if (data[0] === 120 && [1, 94, 156, 218].includes(data[1]))
+            return 'deflate';
+        return 'deflate-raw';
+    };
+    const uint8Data = new Uint8Array(data);
+    const format = detectFormat(uint8Data);
+    const stream = new DecompressionStream(format);
+    // Create a TransformStream to limit the output size
+    const limitStream = new TransformStream({
+        transform(chunk, controller) {
+            controller.enqueue(chunk);
+        },
+        flush(controller) {
+            controller.terminate();
+        }
+    });
+    // Set up the pipeline
+    const { readable, writable } = stream;
+    const writer = writable.getWriter();
+    const limitedReader = readable
+        .pipeThrough(limitStream)
+        .getReader();
+    // Start the write operation
+    writer.write(uint8Data).catch(err => {
+        if (!(err instanceof Error && err.name === 'AbortError')) {
+            console.error('Error during write:', err);
+        }
+    });
+    const chunks = [];
+    let totalBytes = 0;
+    try {
+        while (totalBytes < minOutputBytes) {
+            const { done, value } = await limitedReader.read();
+            if (done)
+                break;
+            const remainingSpace = minOutputBytes - totalBytes;
+            const chunk = value.subarray(0, Math.min(value.length, remainingSpace));
+            chunks.push(chunk);
+            totalBytes += chunk.length;
+            if (totalBytes >= minOutputBytes) {
+                // Clean abort of all streams
+                await Promise.all([
+                    limitedReader.cancel().catch(() => { }),
+                    writer.abort().catch(() => { })
+                ]);
+                break;
+            }
+        }
+    }
+    catch (err) {
+        if (!(err instanceof Error && err.name === 'AbortError')) {
+            console.error('Error during decompression:', err);
+        }
+    }
+    finally {
+        await Promise.allSettled([
+            limitedReader.cancel().catch(() => { }),
+            writer.close().catch(() => { })
+        ]);
+    }
+    // Combine chunks efficiently
+    return chunks.length === 1
+        ? chunks[0].buffer
+        : chunks.reduce((acc, chunk) => {
+            const combined = new Uint8Array(acc.byteLength + chunk.byteLength);
+            combined.set(new Uint8Array(acc), 0);
+            combined.set(chunk, acc.byteLength);
+            return combined.buffer;
+        }, new ArrayBuffer(0));
+}
+/**
  * Reads and returns the header object.
  * @param {ArrayBuffer} data
  * @returns {NIFTI1|NIFTI2}
@@ -108,6 +211,50 @@ export function readHeader(data, isHdrImgPairOK = false) {
     else {
         throw new Error('That file does not appear to be NIFTI!');
     }
+    return header;
+}
+export async function readHeaderAsync(data, isHdrImgPairOK = false) {
+    if (!isCompressed(data)) {
+        return readHeader(data, isHdrImgPairOK);
+    }
+    let header = null;
+    let dat = await decompressHeaderAsync(data, 540);
+    let isLitteEndian = true;
+    let isVers1 = true;
+    var rawData = new DataView(dat);
+    const sigLittle = rawData.getInt32(0, true);
+    const sigBig = rawData.getInt32(0, false);
+    if (sigLittle === 348) {
+        //little NIFTI1
+    }
+    else if (sigBig === 348) {
+        isLitteEndian = false;
+    }
+    else if (sigLittle === 540) {
+        isVers1 = false;
+    }
+    else if (sigBig === 540) {
+        isVers1 = false;
+        isLitteEndian = false;
+    }
+    else {
+        throw new Error('That file does not appear to be NIFTI!');
+    }
+    let vox_offset = Math.round(rawData.getFloat32(108, isLitteEndian));
+    if (NIFTI2) {
+        vox_offset = Utils.getUint64At(rawData, 168, isLitteEndian);
+    }
+    if (vox_offset > dat.byteLength) {
+        // it appears the header has extensions - make sure we have decompressed enough
+        dat = await decompressHeaderAsync(data, vox_offset);
+    }
+    if (isVers1) {
+        header = new NIFTI1();
+    }
+    else {
+        header = new NIFTI2();
+    }
+    header.readHeader(dat);
     return header;
 }
 /**

@@ -18,6 +18,6 @@ export declare class NIFTIEXTENSION {
      * Returns extension as ArrayBuffer.
      * @returns {ArrayBuffer}
      */
-    toArrayBuffer(): ArrayBufferLike;
+    toArrayBuffer(): ArrayBuffer;
 }
 //# sourceMappingURL=nifti-extension.d.ts.map
