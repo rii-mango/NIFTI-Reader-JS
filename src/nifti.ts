@@ -115,24 +115,24 @@ export function decompress(data: ArrayBuffer) {
  * @returns {Promise<ArrayBuffer>}
  */
 export async function decompressAsync(data: ArrayBuffer) {
-  const uint8Data = new Uint8Array(data);
+  const uint8Data = new Uint8Array(data)
   const format = uint8Data[0] === 31 && uint8Data[1] === 139 && uint8Data[2] === 8
       ? 'gzip'
       : uint8Data[0] === 120 && (uint8Data[1] === 1 || uint8Data[1] === 94 || uint8Data[1] === 156 || uint8Data[1] === 218)
           ? 'deflate'
-          : 'deflate-raw';
+          : 'deflate-raw'
 
-  const stream = new DecompressionStream(format);
-  const writer = stream.writable.getWriter();
-  writer.write(uint8Data).catch(console.error); // Do not await this
+  const stream = new DecompressionStream(format)
+  const writer = stream.writable.getWriter()
+  writer.write(uint8Data).catch(console.error) // Do not await this
 
   // Close without awaiting directly, preventing the hang issue
-  const closePromise = writer.close().catch(console.error);
-  const response = new Response(stream.readable);
-  const result = await response.arrayBuffer(); // Return ArrayBuffer instead of Uint8Array
+  const closePromise = writer.close().catch(console.error)
+  const response = new Response(stream.readable)
+  const result = await response.arrayBuffer() // Return ArrayBuffer instead of Uint8Array
 
-  await closePromise; // Ensure close happens eventually
-  return result;
+  await closePromise // Ensure close happens eventually
+  return result
 }
 
 /**
