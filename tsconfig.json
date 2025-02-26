@@ -1,22 +1,21 @@
 {
   "compilerOptions": {
-    "target": "ES2022",                // Updated to match modern Node.js features
-    "module": "NodeNext",              // Keep for Node's ESM support
-    "lib": ["ES2022", "DOM"],          // Ensure modern library support
-    "declaration": true,               // Keep for type definitions
-    "declarationMap": true,            // Keep for easier debugging
-    "sourceMap": true,                 // Keep for source maps
-    "outDir": "dist",                  // Keep for output location
-    "esModuleInterop": true,           // Ensure compatibility with CommonJS
+    "target": "ES2022", // Updated to match modern Node.js features
+    "module": "NodeNext", // Keep for Node's ESM support
+    "lib": ["ES2022", "DOM"], // Ensure modern library support
+    "declaration": true, // Keep for type definitions
+    "declarationMap": true, // Keep for easier debugging
+    "sourceMap": true, // Keep for source maps
+    "outDir": "dist", // Keep for output location
+    "esModuleInterop": true, // Ensure compatibility with CommonJS
     "forceConsistentCasingInFileNames": true,
-    "strict": true,                    // Keep strict type checking
-    "skipLibCheck": true,              // Avoid type issues with external libraries
-    "moduleResolution": "nodenext",    // Ensure Node.js-style resolution
-    "resolveJsonModule": true,         // Allow importing JSON files
+    "strict": true, // Keep strict type checking
+    "skipLibCheck": true, // Avoid type issues with external libraries
+    "moduleResolution": "nodenext", // Ensure Node.js-style resolution
+    "resolveJsonModule": true, // Allow importing JSON files
     "allowSyntheticDefaultImports": true,
-    "types": ["node"]                  // Ensure Node.js types are loaded
+    "types": ["node"] // Ensure Node.js types are loaded
   },
   "include": ["./src/**/*"],
   "exclude": ["node_modules", "dist"]
 }
-
