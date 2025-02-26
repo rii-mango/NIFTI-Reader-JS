@@ -1,37 +1,29 @@
 {
   "name": "nifti-reader-js",
-  "version": "0.7.1",
+  "version": "0.8.0",
   "description": "A JavaScript NIfTI file format reader.",
-  "main": "./dist/src/nifti.js",
+  "main": "./dist/nifti.js",
   "type": "module",
   "exports": {
     ".": {
-      "import": "./dist/src/nifti.js"
+      "import": "./dist/nifti.js"
     }
   },
-  "types": "dist/src/nifti.d.ts",
+  "types": "dist/nifti.d.ts",
   "files": [
-    "release/current/*.js",
-    "dist/src/*.js",
-    "dist/src/*.d.ts",
-    "dist/src/*.js.map",
-    "dist/src/*.ts",
-    "src/*.js",
-    "src/*.d.ts",
-    "src/*.js.map",
-    "src/*.ts"
+    "dist"
   ],
   "devDependencies": {
     "esbuild": "*",
     "jsdoc-to-markdown": "*",
     "prettier": "^3.5.0",
     "tsify": "^5.0.4",
-    "typescript": "^5.0.4",
+    "typescript": "^5.7.3",
     "vitest": "^3.0.5"
   },
   "scripts": {
     "test": "vitest run __tests__/",
-    "build": "rm -rf build && mkdir build && tsc && esbuild dist/src/nifti.js --bundle --outfile=build/nifti-reader.js && esbuild dist/src/nifti.js --bundle --minify --outfile=build/nifti-reader-min.js",
+    "build": "rm -rf build && mkdir build && tsc && esbuild dist/nifti.js --bundle --outfile=build/nifti-reader.js && esbuild dist/nifti.js --bundle --minify --outfile=build/nifti-reader-min.js",
     "doc": "rm -rf build && mkdir build && ./node_modules/.bin/jsdoc2md dist/src/*.js > build/docs.md"
   },
   "repository": {
