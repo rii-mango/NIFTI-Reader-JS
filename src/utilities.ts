@@ -106,7 +106,7 @@ export class Utils {
       }
 
       // esize must be a positive integral multiple of 16
-      if (esize % 16 != 0) {
+      if (esize < 16 || esize % 16 != 0) {
         throw new Error('This does not appear to be a NIFTI extension')
       }
 

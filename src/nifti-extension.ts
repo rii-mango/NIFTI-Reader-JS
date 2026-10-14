@@ -15,7 +15,7 @@ export class NIFTIEXTENSION {
   littleEndian: boolean
 
   constructor(esize: number, ecode: number, edata: ArrayBuffer, littleEndian: boolean) {
-    if (esize % 16 != 0) {
+    if (esize < 16 || esize % 16 != 0) {
       throw new Error('This does not appear to be a NIFTI extension')
     }
     this.esize = esize
