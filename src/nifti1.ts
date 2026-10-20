@@ -217,13 +217,26 @@ export class NIFTI1 {
     this.quatern_c = Utils.getFloatAt(rawData, 260, this.littleEndian)
     this.quatern_d = Utils.getFloatAt(rawData, 264, this.littleEndian)
     // Added by znshje on 27/11/2021
+    // Updated by Chris Markiewicz on 2025-11-24
     //
-    // quatern_a is a parameter in quaternion [a, b, c, d], which is required in affine calculation (METHOD 2)
-    // mentioned in the nifti1.h file
-    // It can be calculated by a = sqrt(1.0-(b*b+c*c+d*d))
-    this.quatern_a = Math.sqrt(
-      1.0 - (Math.pow(this.quatern_b, 2) + Math.pow(this.quatern_c, 2) + Math.pow(this.quatern_d, 2))
-    )
+    // The NIfTI header only explicitly stores the b, c, d components of a unit-norm quaternion.
+    // The implicit component may be calculated as a = sqrt(1.0-(b*b+c*c+d*d))
+    // Due to floating point error, it is common for this result to be imaginary, albeit small.
+    // The NIfTI reference implementation treats any value of 1-(b*b+c*c+d*d) less than 1e-7
+    // as zero and renormalizes the explicit components, if necessary.
+    // This differs from other implementations,
+    // which may error if the difference is larger than 1e-7.
+    // The stored b, c, d are left as read so that writing the header preserves them;
+    // the renormalization is applied only when building the affine below.
+    const sumSq = Math.pow(this.quatern_b, 2) + Math.pow(this.quatern_c, 2) + Math.pow(this.quatern_d, 2)
+    let quaternScale = 1.0
+    // Magic number is roughly epsilon for 32-bit floats
+    if (sumSq > 1 - 1e-7) {
+      this.quatern_a = 0.0
+      quaternScale = 1.0 / Math.sqrt(sumSq)
+    } else {
+      this.quatern_a = Math.sqrt(1 - sumSq)
+    }
 
     this.qoffset_x = Utils.getFloatAt(rawData, 268, this.littleEndian)
     this.qoffset_y = Utils.getFloatAt(rawData, 272, this.littleEndian)
@@ -289,9 +302,9 @@ export class NIFTI1 {
 
       // Define a, b, c, d for coding covenience
       const a = this.quatern_a
-      const b = this.quatern_b
-      const c = this.quatern_c
-      const d = this.quatern_d
+      const b = this.quatern_b * quaternScale
+      const c = this.quatern_c * quaternScale
+      const d = this.quatern_d * quaternScale
 
       this.qfac = this.pixDims[0] === 0 ? 1 : this.pixDims[0]
 
