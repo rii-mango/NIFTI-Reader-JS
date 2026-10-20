@@ -226,16 +226,16 @@ export class NIFTI1 {
     // as zero and renormalizes the explicit components, if necessary.
     // This differs from other implementations,
     // which may error if the difference is larger than 1e-7.
-    let sum_sq = Math.pow(this.quatern_b, 2) + Math.pow(this.quatern_c, 2) + Math.pow(this.quatern_d, 2)
+    // The stored b, c, d are left as read so that writing the header preserves them;
+    // the renormalization is applied only when building the affine below.
+    const sumSq = Math.pow(this.quatern_b, 2) + Math.pow(this.quatern_c, 2) + Math.pow(this.quatern_d, 2)
+    let quaternScale = 1.0
     // Magic number is roughly epsilon for 32-bit floats
-    if (sum_sq > (1 - 1e-7)) {
-        this.quatern_a = 0.0
-        let factor = 1.0 / Math.sqrt(sum_sq)
-        this.quatern_b *= factor
-        this.quatern_c *= factor
-        this.quatern_d *= factor
+    if (sumSq > 1 - 1e-7) {
+      this.quatern_a = 0.0
+      quaternScale = 1.0 / Math.sqrt(sumSq)
     } else {
-        this.quatern_a = Math.sqrt(1 - sum_sq)
+      this.quatern_a = Math.sqrt(1 - sumSq)
     }
 
     this.qoffset_x = Utils.getFloatAt(rawData, 268, this.littleEndian)
@@ -302,9 +302,9 @@ export class NIFTI1 {
 
       // Define a, b, c, d for coding covenience
       const a = this.quatern_a
-      const b = this.quatern_b
-      const c = this.quatern_c
-      const d = this.quatern_d
+      const b = this.quatern_b * quaternScale
+      const c = this.quatern_c * quaternScale
+      const d = this.quatern_d * quaternScale
 
       this.qfac = this.pixDims[0] === 0 ? 1 : this.pixDims[0]
 
