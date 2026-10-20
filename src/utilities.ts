@@ -95,8 +95,8 @@ export class Utils {
         break // no more extensions
       }
 
-      // check if this takes us past vox_offset
-      if (esize + extensionByteIndex > voxOffset) {
+      // check if this is negative or takes us past vox_offset
+      if (esize < 0 || esize + extensionByteIndex > voxOffset) {
         // check if reversing byte order gets a proper size
         extensionLittleEndian = !extensionLittleEndian
         esize = Utils.getIntAt(data, extensionByteIndex, extensionLittleEndian)
@@ -106,7 +106,7 @@ export class Utils {
       }
 
       // esize must be a positive integral multiple of 16
-      if (esize % 16 != 0) {
+      if (esize < 16 || esize % 16 != 0) {
         throw new Error('This does not appear to be a NIFTI extension')
       }
 
