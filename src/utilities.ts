@@ -95,8 +95,8 @@ export class Utils {
         break // no more extensions
       }
 
-      // check if this takes us past vox_offset
-      if (esize + extensionByteIndex > voxOffset) {
+      // check if this is negative or takes us past vox_offset
+      if (esize < 0 || esize + extensionByteIndex > voxOffset) {
         // check if reversing byte order gets a proper size
         extensionLittleEndian = !extensionLittleEndian
         esize = Utils.getIntAt(data, extensionByteIndex, extensionLittleEndian)
